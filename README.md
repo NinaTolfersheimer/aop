@@ -10,6 +10,8 @@ pip install .
 ```
 Congretulations! You should now be able to use `import aop` in every Python file on your machine.
 
+**CAUTION!** aop is still in a pre-release and testing phase. It cannot be considered stable and it is very likely that there are bugs in the code, even ones that will crash the application. In case of doubt, please wait for the full release of v1.0.
+
 ## Scope
 This is a module, so it does not include any way to actually *use* the possibilities it creates. Although it would be possible to run this code in an interactive Python console and to then call the methods directly, this is not the intended usage. This code is meant to be implemented by another application.
 
