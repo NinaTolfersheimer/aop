@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from os import makedirs
 from uuid import uuid4
 
-from current_jd import current_jd
+import aop.current_jd
 
 
 class Session:
@@ -29,11 +29,9 @@ class Session:
     state : str
         A status flag indicating the current status of the observing session.
         The class methods set this flag to either
-            -> "running",
-
-            -> "aborted" or
-
-            -> "ended".
+            - "running",
+            - "aborted" or
+            - "ended".
         Initialized in __init__() to None, updated in start() to "running".
     interrupted : bool
         A status flag indicating whether the session is currently interrupted.
@@ -82,7 +80,7 @@ class Session:
     temp : float or int
         The temperature at the observing site in degrees Celsius.
     pressure : float or int
-        The air pressure at the observing site in Pascal.
+        The air pressure at the observing site in Hectopascal.
     humidity : float or int
         The air humidity at the observing site in percent.
 
@@ -121,12 +119,9 @@ class Session:
         Logs an issue on the current UTC (default, time = -1) or a custom time
         provided as ISO 8601 conform string
         (time = "YYYY-mm-ddTHH:MM:SS.ffffff"). Supports three gravity levels:
-            -> "potential"/"p",
-
-            -> "normal"/"n" and
-
-            -> "major"/"m".
-
+            - "potential"/"p",
+            - "normal"/"n" and
+            - "major"/"m".
         Writes ISSU (Issue).
     point_to_name(targets, time=-1)
         Logs the pointing to one or more targets visible in the same field of
@@ -145,15 +140,11 @@ class Session:
         used on the current UTC (default, time = -1) or a custom time provided
         as ISO 8601 conform string (time = "YYYY-mm-ddTHH:MM:SS.ffffff"). aop
         recognizes five distinct types of frames (ftype):
-            -> "science frame"/"science"/"sf"/"s",
-
-            -> "dark frame"/"dark"/"df"/"d",
-
-            -> "bias frame"/"bias"/"bf"/"b",
-
-            -> "flat frame"/"flat"/"ff"/"f" and
-
-            -> "pointing frame"/"pointing"/"pf"/"p".
+            - "science frame"/"science"/"sf"/"s",
+            - "dark frame"/"dark"/"df"/"d",
+            - "bias frame"/"bias"/"bf"/"b",
+            - "flat frame"/"flat"/"ff"/"f" and
+            - "pointing frame"/"pointing"/"pf"/"p".
         Writes FRAM (Take Frame).
     condition_report(description = None, temp = None, pressure = None, humidity = None, time = -1)
         Logs a condition description (description != None) and/or condition
@@ -335,15 +326,15 @@ class Session:
         This pseudo-private method generates a unique observation ID.
 
         The ID is generated as such:
-            YYYY-mm-dd-HH-MM-SS-uuuuuuuuuu
+            - YYYY-mm-dd-HH-MM-SS-uuuuuuuuuu
         where:
-            YYYY: current UTC year
-            mm: current UTC month
-            dd: current UTC day
-            HH: current UTC hour
-            MM: current UTC minute
-            SS: current UTC second
-            uuuuuuuuuu: a digits-long unique identifier (10 digits per default)
+            - YYYY: current UTC year
+            - mm: current UTC month
+            - dd: current UTC day
+            - HH: current UTC hour
+            - MM: current UTC minute
+            - SS: current UTC second
+            - uuuuuuuuuu: a digits-long unique identifier (10 digits per default)
 
         Parameters
         ----------
@@ -387,21 +378,13 @@ class Session:
             The entry ID generated. It follows the syntax YYYYMMDDhhmmssffffff-u,
             where:
                 - YYYY   is the specified UTC year,
-
                 - MM     is the specified UTC month,
-
                 - DD     is the specified UTC day,
-
                 - hh     is the specified UTC hour,
-
                 - mm     is the specified UTC month,
-
                 - ss     is the specified UTC second,
-
                 - ffffff is the specified fraction of a UTC second and
-
                 - u      represents digits of unique identifier characters.
-
         """
         if time == -1:
             # if current time is used, return an entryID, consisting of the current
@@ -472,7 +455,7 @@ class Session:
 
             # Session Event: The observation started. Check with the AOP
             # Syntax Guide for reference.
-            f.write(f"({self.__create_entry_id()}) {current_jd(time):.10f} -> SEEV SESSION {self.obsID} STARTED\n")
+            f.write(f"({self.__create_entry_id()}) {aop.current_jd.current_jd(time):.10f} -> SEEV SESSION {self.obsID} STARTED\n")
 
         # create or overwrite the parameter and flags log. This is a JSON file.
         with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "w") as f:
@@ -506,7 +489,7 @@ class Session:
 
         """
         with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "at") as f:
-            f.write(f"({self.__create_entry_id(time)}) {current_jd(time):.10f} -> {opcode} {argument}\n")
+            f.write(f"({self.__create_entry_id(time)}) {aop.current_jd.current_jd(time):.10f} -> {opcode} {argument}\n")
 
     def interrupt(self, time=-1):
         """

@@ -5,7 +5,7 @@ This file contains the parse_session function making the parsing of a session po
 """
 
 import json
-import Session
+import aop.Session
 
 
 def parse_session(filepath, session_id):
@@ -44,7 +44,7 @@ def parse_session(filepath, session_id):
         param = json.load(log)
     # unpacking the dictionary we obtained from the .aol, we can construct a
     # new Session object
-    session = Session.Session(filepath, **param)
+    session = aop.Session.Session(filepath, **param)
     # if there is no observationID attribute, we (re-)create it from the
     # function input
     if not hasattr(session, "obsID"):
