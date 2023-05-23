@@ -10,6 +10,6 @@ class SessionIDDoesntExistOnFilepathError(Exception):
         Parameters
         ----------
         invalid_id : str
-            the string causing the trouble
+            the session_id causing the trouble
         """
         self.invalid_string = invalid_id
