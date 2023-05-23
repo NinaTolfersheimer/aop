@@ -6,6 +6,7 @@ This file contains the current_jd function, returning the current Julian Date as
 
 from astropy.time import Time
 
+from InvalidTimeStringError import InvalidTimeStringError
 
 def current_jd(time=-1):
     """
@@ -25,6 +26,8 @@ def current_jd(time=-1):
     ------
     TypeError
         If the 'time' argument is not of type 'str'.
+    InvalidTimeStringError
+        If the 'time' argument is of type 'str' but not interpretable as representing a time to astropy.time.Time.
 
     Returns
     -------
@@ -38,10 +41,12 @@ def current_jd(time=-1):
         return Time.now().jd
     else:
         if isinstance(time, str):
-            # check whether time is a string, like astropy.time.core.Time
-            # expects.
+            # check whether time is a string, like astropy.time.core.Time expects.
             # if so, return the corresponding Julian Date
-            return Time([time], format="isot", scale="utc").jd[0]
+            try:
+                return Time([time], format="isot", scale="utc").jd[0]
+            except ValueError:
+                raise InvalidTimeStringError(time)
         else:
             # if not, demand users put in a string.
             raise TypeError("Please pass a string as 'time' argument, formatted as ISO 8601 time, in UTC.")
