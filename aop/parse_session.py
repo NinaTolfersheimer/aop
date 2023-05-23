@@ -5,7 +5,10 @@ This file contains the parse_session function making the parsing of a session po
 """
 
 import json
+import os.path
 import aop.Session
+from SessionIDDoesntExistOnFilepathError import SessionIDDoesntExistOnFilepathError
+from AolNotFoundError import AolNotFoundError
 
 
 def parse_session(filepath, session_id):
@@ -40,14 +43,25 @@ def parse_session(filepath, session_id):
 
     """
     # provided a filepath and the session_id, we can read the session parameters
-    with open(f"{filepath}/{session_id}/{session_id}.aol", "rb") as log:
-        param = json.load(log)
-    # unpacking the dictionary we obtained from the .aol, we can construct a
-    # new Session object
-    session = aop.Session.Session(filepath, **param)
-    # if there is no observationID attribute, we (re-)create it from the
-    # function input
-    if not hasattr(session, "obsID"):
-        session.obsID = param["obsID"]
-        session.parameters["obsID"] = session.obsID
-    return session
+    if os.path.isdir(filepath):
+        if os.path.isdir(f"{filepath}/{session_id}"):
+            try:
+                with open(f"{filepath}/{session_id}/{session_id}.aol", "rb") as log:
+                    param = json.load(log)
+            except FileNotFoundError:
+                raise AolNotFoundError(session_id)
+            finally:
+                log.close()
+            # unpacking the dictionary we obtained from the .aol, we can construct a
+            # new Session object
+            session = aop.Session.Session(filepath, **param)
+            # if there is no observationID attribute, we (re-)create it from the
+            # function input
+            if not hasattr(session, "obsID"):
+                session.obsID = param["obsID"]
+                session.parameters["obsID"] = session.obsID
+            return session
+        else:
+            raise SessionIDDoesntExistOnFilepathError(session_id)
+    else:
+        raise NotADirectoryError("your 'filepath' argument is not a directory")
