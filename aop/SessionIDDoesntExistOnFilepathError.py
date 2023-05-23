@@ -1,11 +1,11 @@
-class SessionIDDoesntExistError(Exception):
+class SessionIDDoesntExistOnFilepathError(Exception):
     """
     An error raised upon providing a string to current_jd's time argument that is not interpretable as a time.
     """
 
     def __init__(self, invalid_id):
         """
-        Initialization of a SessionIDDoesntExistError object
+        Initialization of a SessionIDDoesntExistOnFilepathError object
 
         Parameters
         ----------
