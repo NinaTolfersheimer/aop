@@ -35,6 +35,7 @@ def current_jd(time=-1):
         The Julian Date corresponding to the datetime provided.
 
     """
+
     if time == -1:
         # if time argument is set to an invalid value, return current Julian
         # Date.

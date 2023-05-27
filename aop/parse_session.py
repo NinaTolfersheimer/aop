@@ -11,7 +11,7 @@ from SessionIDDoesntExistOnFilepathError import SessionIDDoesntExistOnFilepathEr
 from AolNotFoundError import AolNotFoundError
 
 
-def parse_session(filepath, session_id):
+def parse_session(filepath: str, session_id: str):
     """
     This function parses a session from memory to a new Session object.
 
@@ -41,6 +41,14 @@ def parse_session(filepath, session_id):
         run the Session.start() method again, as this would overwrite the
         existing protocol instead of continuing it!
 
+    Raises
+    ------
+    AolNotFoundError
+        If there is no .aol file using the specified filepath and session_id.
+    SessionIDDoesntExistOnFilepathError
+        If the specified session_id is not in the filepath provided.
+    NotADirectoryError
+        If the specified filepath does not constitute a directory.
     """
     # provided a filepath and the session_id, we can read the session parameters
     if os.path.isdir(filepath):
