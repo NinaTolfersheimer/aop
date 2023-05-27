@@ -49,4 +49,5 @@ def current_jd(time=-1):
                 raise InvalidTimeStringError(time)
         else:
             # if not, demand users put in a string.
-            raise TypeError("Please pass a string as 'time' argument, formatted as ISO 8601 time, in UTC.")
+            raise TypeError("Please pass a string as 'time' argument, formatted as ISO 8601 time, in UTC, or -1 to use "
+                            "current time")
