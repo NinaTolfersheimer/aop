@@ -6,10 +6,13 @@ This file contains the Session class essential to the aop module.
 
 import json
 from datetime import datetime, timezone
-from os import makedirs
+from os import makedirs, path
 from uuid import uuid4
 
 import aop.current_jd
+from InvalidTimeStringError import InvalidTimeStringError
+from AopFileAlreadExistsError import AopFileAlreadyExistsError
+from AolFileAlreadyExistsError import AolFileAlreadyExistsError
 
 
 class Session:
@@ -224,6 +227,9 @@ class Session:
 
         """
 
+        if not path.isdir(filepath):
+            raise NotADirectoryError("the filepath you provided is not a directory!")
+
         self.obsID = None
         self.filepath = filepath
 
@@ -273,6 +279,8 @@ class Session:
                 self.digitized = True
             elif not kwargs["digitized"]:
                 self.digitized = False
+            else:
+                raise TypeError("Please provide a boolean value as 'digitized' argument!")
 
         if "objective" in kwargs:
             self.objective = kwargs["objective"]
@@ -293,7 +301,11 @@ class Session:
         self.parameters = kwargs
         # store every additional argument passed to the class as attribute
         # also add self.state and self.interrupted to this parameter
-        # dictionary.
+        # dictionary. This seems inefficient since a Session object now effectively
+        # holds every attribute twice. We could perhaps instead exchange parameters
+        # for a dictionary of all Session object attributes. We will not change that
+        # now, however, since it works for now and could break the whole module if
+        # not correctly implemented.
         self.parameters["state"] = self.state
         self.parameters["interrupted"] = self.interrupted
 
@@ -301,6 +313,12 @@ class Session:
         self.temp = None
         self.pressure = None
         self.humidity = None
+
+        self.parameters["obsID"] = self.obsID
+        self.parameters["conditionDescription"] = self.conditionDescription
+        self.parameters["temp"] = self.temp
+        self.parameters["pressure"] = self.pressure
+        self.parameters["humidity"] = self.humidity
 
     def __repr__(self):
         """
@@ -310,7 +328,7 @@ class Session:
         Returns
         -------
         return_str : str
-            A string containing all the instances attributes and their values
+            A string containing all the instance's attributes and their values
             in line format.
 
         """
@@ -353,7 +371,7 @@ class Session:
     @staticmethod
     def __create_entry_id(time=-1, digits=30):
         """
-        Creates a unique identifier for each and every entry in a .aop protocol.
+        Creates a unique identifier for each and every entry in an .aop protocol.
         This identifier is unique even across observations.
 
         Parameters
@@ -395,11 +413,15 @@ class Session:
             # datetime.datetime.fromisoformat demands.
             if isinstance(time, str):
                 # if so, return an entryId using the time provided
-                timestring = datetime.fromisoformat(time)
-                return f"{timestring.strftime('%Y%m%d%H%M%S%f')}-{uuid4().hex[:digits]}"
+                try:
+                    timestring = datetime.fromisoformat(time)
+                    return f"{timestring.strftime('%Y%m%d%H%M%S%f')}-{uuid4().hex[:digits]}"
+                except ValueError:
+                    raise InvalidTimeStringError(time)
             else:
                 # if not, demand users put in a string.
-                raise TypeError("Please pass a string as 'time' argument, formatted as ISO 8601 time, in UTC.")
+                raise TypeError("Please pass a string as 'time' argument, formatted as ISO 8601 time, in UTC, or -1 to "
+                                "use current time")
 
     def start(self, time=-1):
         """
@@ -439,7 +461,13 @@ class Session:
         # create the directory where the session's data will be stored
         makedirs(self.filepath + "\\" + str(self.obsID), exist_ok=True)
 
-        # create (or overwrite) the main protocol file. Regardless
+        # check whether the protocol files already exist
+        if path.exists(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop"):
+            raise AopFileAlreadyExistsError(self.filepath, self.obsID)
+        if path.exists(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol"):
+            raise AolFileAlreadyExistsError(self.filepath, self.obsID)
+
+        # create the main protocol file. Regardless
         # of the .aop file extension, this should be just an ordinary
         # .txt file.
         with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wt") as f:
@@ -804,6 +832,23 @@ class Session:
 
         """
 
+        # exclude invalid coord values
+        if not type(ra) == float:
+            raise TypeError(f"Please put in coordinates as 'float' object! R.A. value of {str(ra)} is not 'float'.")
+        if not type(dec) == float:
+            raise TypeError(f"Please put in coordinates as 'float' object! Dec. value of {str(dec)} is not 'float'.")
+        if ra < 0.0:
+            raise ValueError(f"R.A. value of {str(ra)} is out of range! Must be >= 0.0h.")
+        elif ra >= 24.0:
+            raise ValueError(f"R.A. value of {str(ra)} is out of range! Must be < 24.0h. aop expects an R.A. value in "
+                             f"hours, so if your coordinates are in degrees, please convert to hours beforehand (divide"
+                             f" by 15).")
+        if dec < -90.0:
+            raise ValueError(f"Dec. value of {str(dec)} is out of range! Must be >= -90.0°.")
+        elif dec > 90.0:
+            raise ValueError(f"Dec. value of {str(dec)} is out of range! Must be <= 90.0°.")
+
+        # if the values are value, we can write them to the protocol
         self.__write_to_aop(self, "POIN", f"Pointing at coordinates: R.A.: {ra} Dec.: {dec}", time)
 
     def take_frame(self, n, ftype, iso, expt, ap, time=-1):
@@ -892,6 +937,20 @@ class Session:
         None.
 
         """
+
+        # type check
+        if not type(n) == int:
+            raise TypeError("Please provide an integer as frame number ('n' argument)!")
+        if not type(ftype) == str:
+            raise TypeError("Please provide a string as frame type ('ftype' argument)!")
+        if not type(expt) == float or not type(expt) == int:
+            raise TypeError("Please provide an integer or float object as exposure time ('expt' argument)!")
+        if not type(ap) == float:
+            raise TypeError("Please provide a float as aperture ('ap' argument)!")
+        if not type(iso) == int:
+            raise TypeError("Please provide an integer as ISO value ('iso' argument)!")
+
+        # decode or pass ftype - or raise ValueError if invalid key
         if ftype == "science" or ftype == "science frame" or ftype == "s" or ftype == "sc":
             typestr = "science"
         elif ftype == "dark" or ftype == "dark frame" or ftype == "d" or ftype == "df":
@@ -904,6 +963,7 @@ class Session:
             typestr = "pointing"
         else:
             raise ValueError("Invalid frame type!")
+
         # after decoding the type of the frame, all the data is written to the
         # protocol
         self.__write_to_aop(self, "FRAM",
@@ -951,7 +1011,7 @@ class Session:
         None.
 
         """
-        if description is not None:
+        if type(description) == str:
             # if a description is provided, set the conditionDescription
             # parameter
             self.conditionDescription = description
@@ -970,7 +1030,7 @@ class Session:
             # finally, write condition description to protocol
             self.__write_to_aop(self, "CDES", description, time)
 
-        if temp is not None:
+        if type(temp) == float or type(temp) == int:
             # if a temperature is provided, set the temp parameter
             self.temp = temp
             self.parameters["temp"] = self.temp
@@ -988,7 +1048,7 @@ class Session:
             # finally, write temperature measurement to protocol
             self.__write_to_aop(self, "CMES", f"Temperature: {self.temp}°C", time)
 
-        if pressure is not None:
+        if type(pressure) == int or type(pressure) == float:
             # if a pressure is provided, set the pressure parameter
             self.pressure = pressure
             self.parameters["pressure"] = self.pressure
@@ -1006,7 +1066,7 @@ class Session:
             # finally, write pressure measurement to protocol
             self.__write_to_aop(self, "CMES", f"Air Pressure: {self.pressure} hPa", time)
 
-        if humidity is not None:
+        if type(humidity) == int or type(humidity) == float:
             # if a humidity value  is provided, set the humidity parameter
             self.humidity = humidity
             self.parameters["humidity"] = self.humidity
