@@ -651,6 +651,29 @@ class Session:
 
     @staticmethod
     def __write_to_aol(self, parameter: str, assigned_value):
+        """
+        This pseudo-private method is used to update the .aol parameter log.
+
+        It takes two arguments, the first being the parameter name being updated,
+        the second one being the value it is assigned.
+
+        Parameters
+        ----------
+        parameter : str
+            The name of the parameter being updated.
+        assigned_value : any
+            The value the parameter should be assigned. Typically, this
+            is a string or boolean.
+
+        Raises
+        ------
+        PermissionError:
+            If the user does not have the adequate access rights for writing to the .aol file.
+
+        Returns
+        -------
+        None.
+        """
         # write flag change to parameter log. Since this is JSON, the file
         # is first read to param ...
         try:
