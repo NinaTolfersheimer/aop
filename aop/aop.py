@@ -10,7 +10,7 @@ from uuid import uuid4
 from aop.tools import *
 
 
-def current_jd(time=-1):
+def current_jd(time: str="current"):
     """
     Returns the Julian Date for the current UTC or a custom datetime.
 
@@ -21,7 +21,7 @@ def current_jd(time=-1):
     ----------
     time : str, optional
         An ISO 8601 conform string of the UTC datetime you want to be converted
-        to a Julian Date. The default is -1, in which case the current UTC
+        to a Julian Date. The default is "current", in which case the current UTC
         datetime will be used.
 
     Raises
@@ -38,9 +38,8 @@ def current_jd(time=-1):
 
     """
 
-    if time == -1:
-        # if time argument is set to an invalid value, return current Julian
-        # Date.
+    if time == "current":
+        # if the current time is requested, return current Julian Date.
         return Time.now().jd
     else:
         if isinstance(time, str):
@@ -52,8 +51,8 @@ def current_jd(time=-1):
                 raise InvalidTimeStringError(time)
         else:
             # if not, demand users put in a string.
-            raise TypeError("Please pass a string as 'time' argument, formatted as ISO 8601 time, in UTC, or -1 to use "
-                            "current time")
+            raise TypeError("Please pass a string as 'time' argument, formatted as ISO 8601 time, in UTC, or 'current' "
+                            "to use current time")
 
 
 def parse_session(filepath: str, session_id: str):
@@ -149,18 +148,18 @@ def generate_observation_id(digits: int = 10):
     return f"{datetime.now(timezone.utc).strftime('%Y-%m-%d-%H-%M-%S')}-{uuid4().hex[:digits]}"
 
 
-def create_entry_id(time: str = -1, digits: int = 30) -> str:
+def create_entry_id(time: str = "current", digits: int = 30) -> str:
     """
     Creates a unique identifier for each and every entry in an .aop protocol.
     This identifier is unique even across observations.
 
     Parameters
     ----------
-    time : int or str, optional
-        If of type int and equal to -1, the current UTC datetime is used for
+    time : str, optional
+        If equal to "current", the current UTC datetime is used for
         entry ID creation. You can also pass an ISO 8601 conform string to
         time, if the time of the entry is not the current time this method is
-        called. The default is -1.
+        called. The default is "current".
     digits : int, optional
         The number of digits to use for the unique part of the entry ID. The
         default is 30.
@@ -168,10 +167,10 @@ def create_entry_id(time: str = -1, digits: int = 30) -> str:
     Raises
     ------
     TypeError
-        If time is != -1, but also not a string.
+        If time is != "current", but also not a string.
     InvalidTimeStringError
-        If a string is provided as 'time' argument, but it does not constitute a valid time string - it is not ISO
-        8601 conform.
+        If a string different from "current" is provided as 'time' argument, but it does not constitute a valid time
+        string - it is not ISO 8601 conform.
 
     Returns
     -------
@@ -187,7 +186,7 @@ def create_entry_id(time: str = -1, digits: int = 30) -> str:
             - ffffff is the specified fraction of a UTC second and
             - u      represents 'digits' of unique identifier characters.
     """
-    if time == -1:
+    if time == "current":
         # if current time is used, return an entryID, consisting of the current
         # UTC and a digits-long unique identifier.
         return f"{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')}-{uuid4().hex[:digits]}"
@@ -203,8 +202,8 @@ def create_entry_id(time: str = -1, digits: int = 30) -> str:
                 raise InvalidTimeStringError(time)
         else:
             # if not, demand users put in a string.
-            raise TypeError("Please pass a string as 'time' argument, formatted as ISO 8601 time, in UTC, or -1 to "
-                            "use current time")
+            raise TypeError("Please pass a string as 'time' argument, formatted as ISO 8601 time, in UTC, or 'current' "
+                            "to use current time")
 
 
 class Session:
@@ -281,58 +280,58 @@ class Session:
 
     Methods
     -------
-    start(time=-1)
-        Starts the observation either on the current UTC (default, time = -1)
+    start(time="current")
+        Starts the observation either on the current UTC (default, time = "current")
         or a custom time provided as ISO 8601 conform string
         (time = "YYYY-mm-ddTHH:MM:SS.ffffff"). Updates 'state' attribute to
         "running". Writes SEEV (Session Event).
-    interrupt(time=-1)
+    interrupt(time="current")
         Interrupts the observation either on the current UTC (default,
-        time = -1) or a custom time provided as ISO 8601 conform string
+        time = "current") or a custom time provided as ISO 8601 conform string
         (time = "YYYY-mm-ddTHH:MM:SS.ffffff"). Updates 'interrupted' attribute
         to True. Writes SEEV (Session Event).
-    resume(time=-1)
-        Resumes the observation either on the current UTC (default, time = -1)
+    resume(time="current")
+        Resumes the observation either on the current UTC (default, time = "current")
         or a custom time provided as ISO 8601 conform string
         (time = "YYYY-mm-ddTHH:MM:SS.ffffff"). Updates 'interrupted' attribute
         to False. Writes SEEV (Session Event).
-    abort(reason, time=-1)
-        Aborts the observation either on the current UTC (default, time = -1)
+    abort(reason, time="current")
+        Aborts the observation either on the current UTC (default, time = "current")
         or a custom time provided as ISO 8601 conform string
         (time = "YYYY-mm-ddTHH:MM:SS.ffffff"). Updates 'state' attribute
         to "aborted". Writes SEEV (Session Event).
-    end(time=-1)
-        Ends the observation either on the current UTC (default, time = -1) or
+    end(time="current")
+        Ends the observation either on the current UTC (default, time = "current") or
         a custom time provided as ISO 8601 conform string
         (time = "YYYY-mm-ddTHH:MM:SS.ffffff"). Updates 'state' attribute
         to "ended". Writes SEEV (Session Event).
-    comment(comment, time=-1)
-        Logs an observer's comment on the current UTC (default, time = -1) or a
+    comment(comment, time="current")
+        Logs an observer's comment on the current UTC (default, time = "current") or a
         custom time provided as ISO 8601 conform string
         (time = "YYYY-mm-ddTHH:MM:SS.ffffff"). Writes OBSC (Observer's Comment)
-    issue(gravity, message, time=-1)
-        Logs an issue on the current UTC (default, time = -1) or a custom time
+    issue(gravity, message, time="current")
+        Logs an issue on the current UTC (default, time = "current") or a custom time
         provided as ISO 8601 conform string
         (time = "YYYY-mm-ddTHH:MM:SS.ffffff"). Supports three gravity levels:
             - "potential"/"p",
             - "normal"/"n" and
             - "major"/"m".
         Writes ISSU (Issue).
-    point_to_name(targets, time=-1)
+    point_to_name(targets, time="current")
         Logs the pointing to one or more targets visible in the same field of
         view and identified by name string on the current UTC
-        (default, time = -1) or a custom time provided
+        (default, time = "current") or a custom time provided
         as ISO 8601 conform string (time = "YYYY-mm-ddTHH:MM:SS.ffffff").
         Writes POIN (Point).
-    point_to_coords(ra, dec, time=-1)
+    point_to_coords(ra, dec, time="current")
         Logs the pointing to one or more targets visible in the same field of
         view and identified by ICRS coordinates on the current UTC
-        (default, time = -1) or a custom time provided
+        (default, time = "current") or a custom time provided
         as ISO 8601 conform string (time = "YYYY-mm-ddTHH:MM:SS.ffffff").
         Writes POIN (Point).
-    take_frame(n, ftype, ISO, expt, ap, time = -1)
+    take_frame(n, ftype, ISO, expt, ap, time = "current")
         Logs the capturing of n frames of type ftype and the camera settings
-        used on the current UTC (default, time = -1) or a custom time provided
+        used on the current UTC (default, time = "current") or a custom time provided
         as ISO 8601 conform string (time = "YYYY-mm-ddTHH:MM:SS.ffffff"). aop
         recognizes five distinct types of frames (ftype):
             - "science frame"/"science"/"sf"/"s",
@@ -341,11 +340,11 @@ class Session:
             - "flat frame"/"flat"/"ff"/"f" and
             - "pointing frame"/"pointing"/"pf"/"p".
         Writes FRAM (Take Frame).
-    condition_report(description = None, temp = None, pressure = None, humidity = None, time = -1)
+    condition_report(description = None, temp = None, pressure = None, humidity = None, time = "current")
         Logs a condition description (description != None) and/or condition
         measurement of temperature (temp != None) and/or air pressure
         (pressure != None) and/or air humidity (humidity != None) on the
-        current UTC (default, time = -1) or a custom time provided as ISO 8601
+        current UTC (default, time = "current") or a custom time provided as ISO 8601
         conform string (time = "YYYY-mm-ddTHH:MM:SS.ffffff"). Updates the
         'conditionDescription' flag if description != None and/or the 'temp'
         flag if temp != None and/or the 'pressure' flag if pressure != None
@@ -533,7 +532,7 @@ class Session:
                 return_str += f"{i}: {self.__dict__[i]}\n"
         return return_str
 
-    def start(self, time=-1):
+    def start(self, time: str="current"):
         """
         This method is called to start the observing session.
 
@@ -552,7 +551,7 @@ class Session:
         ----------
         time : str, optional
             An ISO 8601 conform string of the UTC datetime you want your
-            observation to start. The default is -1, in which case the current
+            observation to start. The default is "current", in which case the current
             UTC datetime will be used.
 
         Raises
@@ -612,7 +611,7 @@ class Session:
             raise PermissionError("Error when writing to .aol: You do not have the adequate access rights!")
 
     @staticmethod
-    def __write_to_aop(self, opcode: str, argument: str, time=-1):
+    def __write_to_aop(self, opcode: str, argument: str, time: str="current"):
         """
         This pseudo-private method is called to update the .aop protocol file.
 
@@ -629,7 +628,7 @@ class Session:
             protocol entry.
         time : str, optional
             An ISO 8601 conform string of the UTC datetime you want to use. The
-            default is -1, in which case the current UTC datetime will be used.
+            default is "current", in which case the current UTC datetime will be used.
             In most cases, however, the calling method will pass its own time
             argument on to __write_to_aop().
 
@@ -668,7 +667,7 @@ class Session:
         except PermissionError:
             raise PermissionError("Error when writing to .aol: You do not have the adequate access rights!")
 
-    def interrupt(self, time=-1):
+    def interrupt(self, time: str="current"):
         """
         This method interrupts the session.
 
@@ -681,7 +680,7 @@ class Session:
         ----------
         time : str, optional
             An ISO 8601 conform string of the UTC datetime you want your
-            observation to be interrupted at. The default is -1, in which case
+            observation to be interrupted at. The default is "current", in which case
             the current UTC datetime will be used.
 
         Raises
@@ -705,7 +704,7 @@ class Session:
         assigned_value = True
         self.__write_to_aol(self, "interrupted", assigned_value)
 
-    def resume(self, time=-1):
+    def resume(self, time: str="current"):
         """
         This method resumes the session.
 
@@ -718,7 +717,7 @@ class Session:
         ----------
         time : str, optional
             An ISO 8601 conform string of the UTC datetime you want your
-            observation to be resumed at. The default is -1, in which case the
+            observation to be resumed at. The default is "current", in which case the
             current UTC datetime will be used.
 
         Raises
@@ -742,7 +741,7 @@ class Session:
         assigned_value = False
         self.__write_to_aol(self, "interrupted", assigned_value)
 
-    def abort(self, reason: str, time=-1):
+    def abort(self, reason: str, time: str="current"):
         """
         This method aborts the session while providing a reason for doing so.
 
@@ -757,7 +756,7 @@ class Session:
             The reason why this session had to be aborted.
         time : str, optional
             An ISO 8601 conform string of the UTC datetime you want your
-            observation to be aborted at. The default is -1, in which case the
+            observation to be aborted at. The default is "current", in which case the
             current UTC datetime will be used.
 
         Raises
@@ -782,7 +781,7 @@ class Session:
         assigned_value = "aborted"
         self.__write_to_aol(self, "state", assigned_value)
 
-    def end(self, time=-1):
+    def end(self, time: str="current"):
         """
         This method is called to end the observing session.
 
@@ -795,7 +794,7 @@ class Session:
         ----------
         time : str, optional
             An ISO 8601 conform string of the UTC datetime you want your
-            observation to be ended at. The default is -1, in which case the
+            observation to be ended at. The default is "current", in which case the
             current UTC datetime will be used.
 
         Raises
@@ -819,7 +818,7 @@ class Session:
         assigned_value = "ended"
         self.__write_to_aol(self, "state", assigned_value)
 
-    def comment(self, comment: str, time=-1):
+    def comment(self, comment: str, time: str="current"):
         """
         This method adds an observer's comment to the protocol.
 
@@ -833,7 +832,7 @@ class Session:
             Whatever you want your comment to read in the protocol.
         time : str, optional
             An ISO 8601 conform string of the UTC datetime you want your
-            comment to be added at. The default is -1, in which case the
+            comment to be added at. The default is "current", in which case the
             current UTC datetime will be used.
 
         Returns
@@ -843,7 +842,7 @@ class Session:
         """
         self.__write_to_aop(self, "OBSC", comment, time)
 
-    def issue(self, gravity: str, message: str, time=-1):
+    def issue(self, gravity: str, message: str, time: str="current"):
         """
         This method is called to report an issue to the protocol.
 
@@ -869,7 +868,7 @@ class Session:
             verbatim.
         time : str, optional
             An ISO 8601 conform string of the UTC datetime you want your
-            issue to be reported at. The default is -1, in which case the
+            issue to be reported at. The default is "current", in which case the
             current UTC datetime will be used.
 
         Raises
@@ -900,7 +899,7 @@ class Session:
             # if users provide any other issue gravity values, aop raises an error.
             raise ValueError("Invalid issue gravity!")
 
-    def point_to_name(self, targets: list, time=-1):
+    def point_to_name(self, targets: list, time: str="current"):
         """
         This method indicates the pointing to a target identified by name.
 
@@ -916,7 +915,7 @@ class Session:
             most likely strings, but it could be any other object.
         time : str, optional
             An ISO 8601 conform string of the UTC datetime you want your
-            pointing to be reported at. The default is -1, in which case the
+            pointing to be reported at. The default is "current", in which case the
             current UTC datetime will be used.
 
         Raises
@@ -948,7 +947,7 @@ class Session:
         # ... and writes that string to the protocol.
         self.__write_to_aop(self, "POIN", f"Pointing at target(s): {tar_str}", time)
 
-    def point_to_coords(self, ra: float, dec: float, time=-1):
+    def point_to_coords(self, ra: float, dec: float, time: str="current"):
         """
         This method indicates the pointing to ICRS coordinates.
 
@@ -968,7 +967,7 @@ class Session:
             Declination in the ICRS coordinate framework.
         time : str, optional
             An ISO 8601 conform string of the UTC datetime you want your
-            pointing to be reported at. The default is -1, in which case the
+            pointing to be reported at. The default is "current", in which case the
             current UTC datetime will be used.
 
         Raises
@@ -1005,7 +1004,7 @@ class Session:
         # if the values are value, we can write them to the protocol
         self.__write_to_aop(self, "POIN", f"Pointing at coordinates: R.A.: {ra} Dec.: {dec}", time)
 
-    def take_frame(self, n: int, ftype: str, iso: int, expt: float, ap: float, time=-1):
+    def take_frame(self, n: int, ftype: str, iso: int, expt: float, ap: float, time: str="current"):
         """
         This method reports the taking of one or more frame(s) of the same target and the camera settings used.
 
@@ -1057,7 +1056,7 @@ class Session:
             method.
         time : str, optional
             An ISO 8601 conform string of the UTC datetime you want your
-            frame(s) to be reported at. The default is -1, in which case the
+            frame(s) to be reported at. The default is "current", in which case the
             current UTC datetime will be used.
 
         Raises
@@ -1131,7 +1130,7 @@ class Session:
                             f"{n} {typestr} frame(s) taken with settings: Exp.t.: {expt}s, Ap.: f/{ap}, ISO: {iso}",
                             time)
 
-    def condition_report(self, description=None, temp=None, pressure=None, humidity=None, time=-1):
+    def condition_report(self, description=None, temp=None, pressure=None, humidity=None, time: str="current"):
         """
         This method reports a condition description or measurement.
 
@@ -1164,7 +1163,7 @@ class Session:
             The measured air humidity in %. The default is None.
         time : str, optional
             An ISO 8601 conform string of the UTC datetime you want your
-            condition update to be reported at. The default is -1, in which
+            condition update to be reported at. The default is "current", in which
             case the current UTC datetime will be used.
 
         Raises
