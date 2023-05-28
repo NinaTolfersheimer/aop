@@ -1,18 +1,210 @@
 """
-@author: Amélie Solveigh Hohe
-
-This file contains the Session class essential to the aop module.
 """
 
+from astropy.time import Time
 import json
 from datetime import datetime, timezone
 from os import makedirs, path
 from uuid import uuid4
 
-import aop.current_jd
-from InvalidTimeStringError import InvalidTimeStringError
-from AopFileAlreadExistsError import AopFileAlreadyExistsError
-from AolFileAlreadyExistsError import AolFileAlreadyExistsError
+from aop.tools import *
+
+
+def current_jd(time=-1):
+    """
+    Returns the Julian Date for the current UTC or a custom datetime.
+
+    It makes use of astropy's 'Time' object to represent the datetime given as
+    a Julian Date.
+
+    Parameters
+    ----------
+    time : str, optional
+        An ISO 8601 conform string of the UTC datetime you want to be converted
+        to a Julian Date. The default is -1, in which case the current UTC
+        datetime will be used.
+
+    Raises
+    ------
+    TypeError
+        If the 'time' argument is not of type 'str'.
+    InvalidTimeStringError
+        If the 'time' argument is of type 'str' but not interpretable as representing a time to astropy.time.Time.
+
+    Returns
+    -------
+    numpy.float64
+        The Julian Date corresponding to the datetime provided.
+
+    """
+
+    if time == -1:
+        # if time argument is set to an invalid value, return current Julian
+        # Date.
+        return Time.now().jd
+    else:
+        if isinstance(time, str):
+            # check whether time is a string, like astropy.time.core.Time expects.
+            # if so, return the corresponding Julian Date
+            try:
+                return Time([time], format="isot", scale="utc").jd[0]
+            except ValueError:
+                raise InvalidTimeStringError(time)
+        else:
+            # if not, demand users put in a string.
+            raise TypeError("Please pass a string as 'time' argument, formatted as ISO 8601 time, in UTC, or -1 to use "
+                            "current time")
+
+
+def parse_session(filepath: str, session_id: str):
+    """
+    This function parses a session from memory to a new Session object.
+
+    Provided with the filepath to the general location where the protocol and
+    log files are stored and an observation ID, it reads in the observation
+    parameters from the session's parameter log. This information is then used
+    to create a new Session object, which is returned by the function. If it
+    has no observationID attribute, it is recreated from the function input.
+
+    Parameters
+    ----------
+    filepath : str
+        The path to the file where you expect the session directory to reside.
+        This is most likely equivalent to the path passed to the Session class
+        to create its files in, which in turn is most likely somewhere in the
+        installation directory of the implementing script.
+    session_id : str
+        The observationID of the session to be parsed.
+
+    Returns
+    -------
+    session : Session
+        The new Session object parsed from the stored observation parameters.
+        For all intents and purposes, this object is equivalent to the object
+        whose parameters were used to parse, and you can use it to continue your
+        observation session or protocol just the same. Just be careful not to
+        run the Session.start() method again, as this would overwrite the
+        existing protocol instead of continuing it!
+
+    Raises
+    ------
+    AolNotFoundError
+        If there is no .aol file using the specified filepath and session_id.
+    SessionIDDoesntExistOnFilepathError
+        If the specified session_id is not in the filepath provided.
+    NotADirectoryError
+        If the specified filepath does not constitute a directory.
+    """
+    # provided a filepath and the session_id, we can read the session parameters
+    if path.isdir(filepath):
+        if path.isdir(f"{filepath}/{session_id}"):
+            try:
+                with open(f"{filepath}/{session_id}/{session_id}.aol", "rb") as log:
+                    param = json.load(log)
+            except FileNotFoundError:
+                raise AolNotFoundError(session_id)
+            finally:
+                log.close()
+            # unpacking the dictionary we obtained from the .aol, we can construct a
+            # new Session object
+            session = Session(filepath, **param)
+            # if there is no observationID attribute, we (re-)create it from the
+            # function input
+            if not hasattr(session, "obsID"):
+                session.obsID = param["obsID"]
+                session.parameters["obsID"] = session.obsID
+            return session
+        else:
+            raise SessionIDDoesntExistOnFilepathError(session_id)
+    else:
+        raise NotADirectoryError("your 'filepath' argument is not a directory")
+
+
+def generate_observation_id(digits: int = 10):
+    """
+    This pseudo-private method generates a unique observation ID.
+
+    The ID is generated as such: YYYY-mm-dd-HH-MM-SS-uuuuuuuuuu,
+    where:
+        - YYYY: current UTC year
+        - mm: current UTC month
+        - dd: current UTC day
+        - HH: current UTC hour
+        - MM: current UTC minute
+        - SS: current UTC second
+        - uuuuuuuuuu: a 'digits'-long unique identifier (10 digits per default)
+
+    Parameters
+    ----------
+    digits : int, optional
+        The number of digits to be used for the unique identifier part of
+        the observation ID. The default is 10.
+
+    Returns
+    -------
+    str
+        The generated observation ID.
+
+    """
+    return f"{datetime.now(timezone.utc).strftime('%Y-%m-%d-%H-%M-%S')}-{uuid4().hex[:digits]}"
+
+
+def create_entry_id(time: str = -1, digits: int = 30) -> str:
+    """
+    Creates a unique identifier for each and every entry in an .aop protocol.
+    This identifier is unique even across observations.
+
+    Parameters
+    ----------
+    time : int or str, optional
+        If of type int and equal to -1, the current UTC datetime is used for
+        entry ID creation. You can also pass an ISO 8601 conform string to
+        time, if the time of the entry is not the current time this method is
+        called. The default is -1.
+    digits : int, optional
+        The number of digits to use for the unique part of the entry ID. The
+        default is 30.
+
+    Raises
+    ------
+    TypeError
+        If time is != -1, but also not a string.
+    InvalidTimeStringError
+        If a string is provided as 'time' argument, but it does not constitute a valid time string - it is not ISO
+        8601 conform.
+
+    Returns
+    -------
+    str
+        The entry ID generated. It follows the syntax YYYYMMDDhhmmssffffff-u,
+        where:
+            - YYYY   is the specified UTC year,
+            - MM     is the specified UTC month,
+            - DD     is the specified UTC day,
+            - hh     is the specified UTC hour,
+            - mm     is the specified UTC month,
+            - ss     is the specified UTC second,
+            - ffffff is the specified fraction of a UTC second and
+            - u      represents 'digits' of unique identifier characters.
+    """
+    if time == -1:
+        # if current time is used, return an entryID, consisting of the current
+        # UTC and a digits-long unique identifier.
+        return f"{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')}-{uuid4().hex[:digits]}"
+    else:
+        # if not, check whether time is a string, like
+        # datetime.datetime.fromisoformat demands.
+        if isinstance(time, str):
+            # if so, return an entryId using the time provided
+            try:
+                timestring = datetime.fromisoformat(time)
+                return f"{timestring.strftime('%Y%m%d%H%M%S%f')}-{uuid4().hex[:digits]}"
+            except ValueError:
+                raise InvalidTimeStringError(time)
+        else:
+            # if not, demand users put in a string.
+            raise TypeError("Please pass a string as 'time' argument, formatted as ISO 8601 time, in UTC, or -1 to "
+                            "use current time")
 
 
 class Session:
@@ -341,93 +533,6 @@ class Session:
                 return_str += f"{i}: {self.__dict__[i]}\n"
         return return_str
 
-    @staticmethod
-    def __generate_observation_id(digits: int = 10):
-        """
-        This pseudo-private method generates a unique observation ID.
-
-        The ID is generated as such: YYYY-mm-dd-HH-MM-SS-uuuuuuuuuu,
-        where:
-            - YYYY: current UTC year
-            - mm: current UTC month
-            - dd: current UTC day
-            - HH: current UTC hour
-            - MM: current UTC minute
-            - SS: current UTC second
-            - uuuuuuuuuu: a 'digits'-long unique identifier (10 digits per default)
-
-        Parameters
-        ----------
-        digits : int, optional
-            The number of digits to be used for the unique identifier part of
-            the observation ID. The default is 10.
-
-        Returns
-        -------
-        str
-            The generated observation ID.
-
-        """
-        return f"{datetime.now(timezone.utc).strftime('%Y-%m-%d-%H-%M-%S')}-{uuid4().hex[:digits]}"
-
-    @staticmethod
-    def __create_entry_id(time: str = -1, digits: int = 30) -> str:
-        """
-        Creates a unique identifier for each and every entry in an .aop protocol.
-        This identifier is unique even across observations.
-
-        Parameters
-        ----------
-        time : int or str, optional
-            If of type int and equal to -1, the current UTC datetime is used for
-            entry ID creation. You can also pass an ISO 8601 conform string to
-            time, if the time of the entry is not the current time this method is
-            called. The default is -1.
-        digits : int, optional
-            The number of digits to use for the unique part of the entry ID. The
-            default is 30.
-
-        Raises
-        ------
-        TypeError
-            If time is != -1, but also not a string.
-        InvalidTimeStringError
-            If a string is provided as 'time' argument, but it does not constitute a valid time string - it is not ISO
-            8601 conform.
-
-        Returns
-        -------
-        str
-            The entry ID generated. It follows the syntax YYYYMMDDhhmmssffffff-u,
-            where:
-                - YYYY   is the specified UTC year,
-                - MM     is the specified UTC month,
-                - DD     is the specified UTC day,
-                - hh     is the specified UTC hour,
-                - mm     is the specified UTC month,
-                - ss     is the specified UTC second,
-                - ffffff is the specified fraction of a UTC second and
-                - u      represents 'digits' of unique identifier characters.
-        """
-        if time == -1:
-            # if current time is used, return an entryID, consisting of the current
-            # UTC and a digits-long unique identifier.
-            return f"{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')}-{uuid4().hex[:digits]}"
-        else:
-            # if not, check whether time is a string, like
-            # datetime.datetime.fromisoformat demands.
-            if isinstance(time, str):
-                # if so, return an entryId using the time provided
-                try:
-                    timestring = datetime.fromisoformat(time)
-                    return f"{timestring.strftime('%Y%m%d%H%M%S%f')}-{uuid4().hex[:digits]}"
-                except ValueError:
-                    raise InvalidTimeStringError(time)
-            else:
-                # if not, demand users put in a string.
-                raise TypeError("Please pass a string as 'time' argument, formatted as ISO 8601 time, in UTC, or -1 to "
-                                "use current time")
-
     def start(self, time=-1):
         """
         This method is called to start the observing session.
@@ -465,7 +570,7 @@ class Session:
         self.parameters["state"] = "running"
 
         # generate a unique observation ID and store it as attribute
-        self.obsID = self.__generate_observation_id()
+        self.obsID = generate_observation_id()
         self.parameters["obsID"] = self.obsID
 
         # create the directory where the session's data will be stored
@@ -494,7 +599,7 @@ class Session:
 
                 # Session Event: The observation started. Check with the AOP
                 # Syntax Guide for reference.
-                f.write(f"({self.__create_entry_id()}) {aop.current_jd.current_jd(time):.10f} -> SEEV SESSION "
+                f.write(f"({create_entry_id()}) {current_jd(time):.10f} -> SEEV SESSION "
                         f"{self.obsID} STARTED\n")
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
@@ -540,10 +645,28 @@ class Session:
         """
         try:
             with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "at") as f:
-                f.write(f"({self.__create_entry_id(time)}) {aop.current_jd.current_jd(time):.10f} -> {opcode} "
+                f.write(f"({create_entry_id(time)}) {current_jd(time):.10f} -> {opcode} "
                         f"{argument}\n")
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
+
+    @staticmethod
+    def __write_to_aol(self, parameter: str, assigned_value):
+        # write flag change to parameter log. Since this is JSON, the file
+        # is first read to param ...
+        try:
+            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "rb") as log:
+                param = json.load(log)
+        except PermissionError:
+            raise PermissionError("Error when reading from .aol: You do not have the adequate access rights!")
+        # ... then the flag is updated there ...
+        param[parameter] = assigned_value
+        # ... before the file is overwritten with the updated param object.
+        try:
+            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "w") as log:
+                log.write(json.dumps(param, indent=4))
+        except PermissionError:
+            raise PermissionError("Error when writing to .aol: You do not have the adequate access rights!")
 
     def interrupt(self, time=-1):
         """
@@ -578,21 +701,9 @@ class Session:
         # write session event: session interrupted to protocol
         self.__write_to_aop(self, "SEEV", "SESSION INTERRUPTED", time=time)
 
-        # write flag change to parameter log. Since this is JSON, the file
-        # is first read to param ...
-        try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "rb") as log:
-                param = json.load(log)
-        except PermissionError:
-            raise PermissionError("Error when reading from .aol: You do not have the adequate access rights!")
-        # ... then the flag is updated there ...
-        param["interrupted"] = True
-        # ... before the file is overwritten with the updated param object.
-        try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "w") as log:
-                log.write(json.dumps(param, indent=4))
-        except PermissionError:
-            raise PermissionError("Error when writing to .aol: You do not have the adequate access rights!")
+        # update session parameters: interrupted = True
+        assigned_value = True
+        self.__write_to_aol(self, "interrupted", assigned_value)
 
     def resume(self, time=-1):
         """
@@ -627,21 +738,9 @@ class Session:
         # write session event: session resumed to protocol
         self.__write_to_aop(self, "SEEV", "SESSION RESUMED", time)
 
-        # write flag change to parameter log. Since this is JSON, the file
-        # is first read to param ...
-        try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "rb") as log:
-                param = json.load(log)
-        except PermissionError:
-            raise PermissionError("Error when reading from .aol: You do not have the adequate access rights!")
-        # ... then the flag is updated there ...
-        param["interrupted"] = False
-        # ... before the file is overwritten with the updated param object.
-        try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "w") as log:
-                log.write(json.dumps(param, indent=4))
-        except PermissionError:
-            raise PermissionError("Error when writing to .aol: You do not have the adequate access rights!")
+        # update session parameters: interrupted = False
+        assigned_value = False
+        self.__write_to_aol(self, "interrupted", assigned_value)
 
     def abort(self, reason: str, time=-1):
         """
@@ -679,21 +778,9 @@ class Session:
         # reason
         self.__write_to_aop(self, "SEEV", f"{reason}: SESSION {self.obsID} ABORTED", time)
 
-        # write flag change to parameter log. Since this is JSON, the file
-        # is first read to param ...
-        try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "rb") as log:
-                param = json.load(log)
-        except PermissionError:
-            raise PermissionError("Error when reading from .aol: You do not have the adequate access rights!")
-        # ... then the flag is updated there ...
-        param["state"] = "aborted"
-        # ... before the file is overwritten with the updated param object.
-        try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "w") as log:
-                log.write(json.dumps(param, indent=4))
-        except PermissionError:
-            raise PermissionError("Error when writing to .aol: You do not have the adequate access rights!")
+        # update session parameters: state = aborted
+        assigned_value = "aborted"
+        self.__write_to_aol(self, "state", assigned_value)
 
     def end(self, time=-1):
         """
@@ -728,21 +815,9 @@ class Session:
         # write session event: session ended to protocol
         self.__write_to_aop(self, "SEEV", f"SESSION {self.obsID} ENDED", time)
 
-        # write flag change to parameter log. Since this is JSON, the file
-        # is first read to param ...
-        try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "rb") as log:
-                param = json.load(log)
-        except PermissionError:
-            raise PermissionError("Error when reading from .aol: You do not have the adequate access rights!")
-        # ... then the flag is updated there ...
-        param["state"] = "ended"
-        # ... before the file is overwritten with the updated param object.
-        try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "w") as log:
-                log.write(json.dumps(param, indent=4))
-        except PermissionError:
-            raise PermissionError("Error when writing to .aol: You do not have the adequate access rights!")
+        # update session parameters: state = ended
+        assigned_value = "ended"
+        self.__write_to_aol(self, "state", assigned_value)
 
     def comment(self, comment: str, time=-1):
         """
@@ -1108,21 +1183,8 @@ class Session:
             self.conditionDescription = description
             self.parameters["conditionDescription"] = self.conditionDescription
 
-            # write flag change to parameter log. Since this is JSON, the file
-            # is first read to param ...
-            try:
-                with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "rb") as log:
-                    param = json.load(log)
-            except PermissionError:
-                raise PermissionError("Error when reading from .aol: You do not have the adequate access rights!")
-            # ... then the flag is updated there ...
-            param["conditionDescription"] = description
-            # ... before the file is overwritten with the updated param object.
-            try:
-                with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "w") as log:
-                    log.write(json.dumps(param, indent=4))
-            except PermissionError:
-                raise PermissionError("Error when writing to .aol: You do not have the adequate access rights!")
+            # update session parameters: conditionDescription = description
+            self.__write_to_aol(self, "conditionDescription", description)
 
             # finally, write condition description to protocol
             self.__write_to_aop(self, "CDES", description, time)
@@ -1132,21 +1194,8 @@ class Session:
             self.temp = temp
             self.parameters["temp"] = self.temp
 
-            # write flag change to parameter log. Since this is JSON, the file
-            # is first read to param ...
-            try:
-                with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "rb") as log:
-                    param = json.load(log)
-            except PermissionError:
-                raise PermissionError("Error when reading from .aol: You do not have the adequate access rights!")
-            # ... then the flag is updated there ...
-            param["temp"] = temp
-            # ... before the file is overwritten with the updated param object.
-            try:
-                with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "w") as log:
-                    log.write(json.dumps(param, indent=4))
-            except PermissionError:
-                raise PermissionError("Error when writing to .aol: You do not have the adequate access rights!")
+            # update session parameters: temp = temp
+            self.__write_to_aol(self, "temp", temp)
 
             # finally, write temperature measurement to protocol
             self.__write_to_aop(self, "CMES", f"Temperature: {self.temp}°C", time)
@@ -1156,21 +1205,8 @@ class Session:
             self.pressure = pressure
             self.parameters["pressure"] = self.pressure
 
-            # write flag change to parameter log. Since this is JSON, the file
-            # is first read to param ...
-            try:
-                with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "rb") as log:
-                    param = json.load(log)
-            except PermissionError:
-                raise PermissionError("Error when reading from .aol: You do not have the adequate access rights!")
-            # ... then the flag is updated there ...
-            param["pressure"] = pressure
-            # ... before the file is overwritten with the updated param object.
-            try:
-                with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "w") as log:
-                    log.write(json.dumps(param, indent=4))
-            except PermissionError:
-                raise PermissionError("Error when writing to .aol: You do not have the adequate access rights!")
+            # update session parameters: pressure = pressure
+            self.__write_to_aol(self, "pressure", pressure)
 
             # finally, write pressure measurement to protocol
             self.__write_to_aop(self, "CMES", f"Air Pressure: {self.pressure} hPa", time)
@@ -1180,21 +1216,8 @@ class Session:
             self.humidity = humidity
             self.parameters["humidity"] = self.humidity
 
-            # write flag change to parameter log. Since this is JSON, the file
-            # is first read to param ...
-            try:
-                with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "rb") as log:
-                    param = json.load(log)
-            except PermissionError:
-                raise PermissionError("Error when reading from .aol: You do not have the adequate access rights!")
-            # ... then the flag is updated there ...
-            param["humidity"] = humidity
-            # ... before the file is overwritten with the updated param object.
-            try:
-                with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "w") as log:
-                    log.write(json.dumps(param, indent=4))
-            except PermissionError:
-                raise PermissionError("Error when writing to .aol: You do not have the adequate access rights!")
+            # update session parameters: humidity = hunidity
+            self.__write_to_aol(self, "humidity", humidity)
 
             # finally, write humidity measurement to protocol
             self.__write_to_aop(self, "CMES", f"Air Humidity: {self.humidity}%", time)
