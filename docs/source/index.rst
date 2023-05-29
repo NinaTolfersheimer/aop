@@ -31,11 +31,11 @@ arise. Also be sure to check out the search function and the index function if y
 searching for something specific!
 
 .. toctree::
+
+   :maxdepth: 2
+   :caption: Contents:
    installation
    examples
    Tutorial
    genindex
-
-   :maxdepth: 2
-   :caption: Contents:
 
