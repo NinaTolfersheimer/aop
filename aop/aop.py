@@ -1,4 +1,7 @@
 """
+@author: Amélie Solveigh Hohe
+
+This module contains the main classes and functions of the aop package.
 """
 import numpy
 from astropy.time import Time
@@ -23,7 +26,7 @@ def current_jd(time: str = "current") -> numpy.float64:
     :type time: ``str``, optional
 
     :raises TypeError: If the ``time`` argument is not of type ``str``.
-    :raises :class:`InvalidTimeStringError`: If the ``time`` argument is of type ``str`` but not interpretable as
+    :raises InvalidTimeStringError: If the ``time`` argument is of type ``str`` but not interpretable as
         representing a time to astropy.time.Time.
 
     :return: The Julian Date corresponding to the datetime provided.
@@ -85,7 +88,7 @@ def create_entry_id(time: str = "current", digits: int = 30) -> str:
     :type digits: ``int``, optional
 
     :raises TypeError: If time is not a string.
-    :raises :class:`InvalidTimeStringError`: If a string different from "current" is provided as '``time`` argument, but
+    :raises InvalidTimeStringError: If a string different from "current" is provided as ``time`` argument, but
         it is not ISO 8601 conform and therefore does not constitute a valid time string.
 
     :return: The entry ID generated. It follows the syntax YYYYMMDDhhmmssffffff-u,
@@ -127,7 +130,7 @@ class Session:
 
     The Session class provides several public methods representing different
     actions and events that occur throughout an astronomical observation.
-    It is logged following the Astronomical Observation Protocol Standard v1.0.
+    It is logged according to the Astronomical Observation Protocol Standard v1.0.
     """
 
     def __init__(self, filepath: str, **kwargs) -> None:
@@ -188,7 +191,7 @@ class Session:
             raise NotADirectoryError("the filepath you provided is not a directory!")
 
         self.obsID = None
-        """The unique observation ID generated using the :function:`generate_observation_id()`
+        """The unique observation ID generated using the :func:`generate_observation_id()`
         function."""
         self.filepath = filepath
         """The path where the implementing script wants aop to store its files. This could be a part of the implementing 
@@ -350,6 +353,8 @@ class Session:
 
         :raises PermissionError: If the user does not have the adequate access rights for reading from or writing to the
             .aol or .aop file.
+        :raises AopFileAlreadyExistsError: If the .aop file the method tries to create already exists.
+        :raises AolFileAlreadyExistsError: If the .aol file the method tries to create already exists.
         """
 
         # initialize session's state to "running"
@@ -442,6 +447,7 @@ class Session:
             is a string or boolean.
         :type assigned_value: any
 
+        :raises PermissionError: If the user does not have the adequate access rights for reading from the .aol file.
         :raises PermissionError: If the user does not have the adequate access rights for writing to the .aol file.
         """
 
@@ -765,6 +771,7 @@ class Session:
         :param time: An ISO 8601 conform string of the UTC datetime you want your
             frame(s) to be reported at. Can also be "current", in which case the
             current UTC datetime will be used, defaults to "current".
+        :type time: ``str``, optional
 
         :raises TypeError: If one of the parameters is not of the required type:
                 * n: int
@@ -929,8 +936,8 @@ def parse_session(filepath: str, session_id: str) -> Session:
     :param session_id: The observationID of the session to be parsed.
     :type session_id: str
 
-    :raises :class:`AolNotFoundError`: If there is no .aol file using the specified filepath and session_id.
-    :raises :class:`SessionIdDoesntExistOnFilepathError`: If the specified session_id is not in the filepath provided.
+    :raises AolNotFoundError: If there is no .aol file using the specified filepath and session_id.
+    :raises SessionIdDoesntExistOnFilepathError: If the specified session_id is not in the filepath provided.
     :raises NotADirectoryError: If the specified filepath does not constitute a directory.
 
     :return: The new Session object parsed from the stored observation parameters.

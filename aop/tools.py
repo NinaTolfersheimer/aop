@@ -1,3 +1,10 @@
+"""
+@author: Amélie Solveigh Hohe
+
+This module contains auxiliary classes and functions for the aop package.
+"""
+
+
 class AolFileAlreadyExistsError(Exception):
     """
     An error raised upon trying to initialize an .aol file that already exists.
