@@ -126,7 +126,7 @@ class NotInterruptableError(SessionStateError):
     """
     An error raised when trying to interrupt a session that is not currently 'running'.
 
-    Inherits from SessionStateError, uses "interrupt session" as impossible operation
+    Inherits from :class:`SessionStateError`, uses "interrupt session" as impossible operation
     and "not running" as problematic session state.
     """
     def __init__(self) -> None:
@@ -140,7 +140,7 @@ class NotResumableError(SessionStateError):
     """
     An error raised when trying to resume a session that is not currently 'running'.
 
-    Inherits from SessionStateError, uses "resume session" as impossible operation
+    Inherits from :class:`SessionStateError`, uses "resume session" as impossible operation
     and "not running" as problematic session state.
     """
     def __init__(self) -> None:
@@ -154,7 +154,7 @@ class NotAbortableError(SessionStateError):
     """
     An error raised when trying to abort a session that is not currently 'running'.
 
-    Inherits from SessionStateError, uses "abort session" as impossible operation
+    Inherits from :class:`SessionStateError`, uses "abort session" as impossible operation
     and "not running" as problematic session state.
     """
     def __init__(self) -> None:
@@ -168,7 +168,7 @@ class NotEndableError(SessionStateError):
     """
     An error raised when trying to end a session that is not currently 'running'.
 
-    Inherits from SessionStateError, uses "end session" as impossible operation
+    Inherits from :class:`SessionStateError`, uses "end session" as impossible operation
     and "not running" as problematic session state.
     """
     def __init__(self) -> None:
@@ -182,7 +182,7 @@ class AlreadyInterruptedError(SessionStateError):
     """
     An error raised when trying to interrupt a session that is already 'interrupted'.
 
-    Inherits from SessionStateError, uses "interrupt session" as impossible operation
+    Inherits from :class:`SessionStateError`, uses "interrupt session" as impossible operation
     and "interrupted" as problematic session state.
     """
     def __init__(self) -> None:
@@ -196,7 +196,7 @@ class NotInterruptedError(SessionStateError):
     """
     An error raised when trying to resume a session that is not currently 'interrupted'.
 
-    Inherits from SessionStateError, uses "resume session" as impossible operation
+    Inherits from :class:`SessionStateError`, uses "resume session" as impossible operation
     and "not interrupted" as problematic session state.
     """
     def __init__(self) -> None:
