@@ -89,3 +89,117 @@ class SessionIDDoesntExistOnFilepathError(Exception):
         """
 
         self.invalid_id = invalid_id
+
+
+class SessionStateError(Exception):
+    """
+    An error raised when the current session parameters don't allow for the requested operation.
+    """
+    def __init__(self, event: str, state: str) -> None:
+        """
+        Constructor method of SessionStateError.
+
+        :param event: The operation to be executed.
+        :type event: ``str``
+        :param state: The state blocking the operation execution. This does not
+            need to be equivalent to the Session.state attribute of the Session class,
+            so values like 'not interrupted' are totally valid.
+        :type state: ``str``
+        """
+
+        self.event = event
+        self.state = state
+
+    def __str__(self) -> str:
+        """
+        The default custom error message of SessionStateError
+
+        :return: default custom error message
+        :rtype: ``str``
+        """
+
+        return f"Not able to {self.event}: session currently {self.state}."
+
+
+class NotInterruptableError(SessionStateError):
+    """
+    An error raised when trying to interrupt a session that is not currently 'running'.
+
+    Inherits from SessionStateError, uses "interrupt session" as impossible operation
+    and "not running" as problematic session state.
+    """
+    def __init__(self) -> None:
+        """
+        Constructor method of NotInterruptableError.
+        """
+        super().__init__(event="interrupt session", state="not 'running'")
+
+
+class NotResumableError(SessionStateError):
+    """
+    An error raised when trying to resume a session that is not currently 'running'.
+
+    Inherits from SessionStateError, uses "resume session" as impossible operation
+    and "not running" as problematic session state.
+    """
+    def __init__(self) -> None:
+        """
+        Constructor method of NotResumableSession.
+        """
+        super().__init__(event="resume session", state="not 'running'")
+
+
+class NotAbortableError(SessionStateError):
+    """
+    An error raised when trying to abort a session that is not currently 'running'.
+
+    Inherits from SessionStateError, uses "abort session" as impossible operation
+    and "not running" as problematic session state.
+    """
+    def __init__(self) -> None:
+        """
+        Constructor method of NotAbortableError
+        """
+        super().__init__(event="abort session", state="not 'running'")
+
+
+class NotEndableError(SessionStateError):
+    """
+    An error raised when trying to end a session that is not currently 'running'.
+
+    Inherits from SessionStateError, uses "end session" as impossible operation
+    and "not running" as problematic session state.
+    """
+    def __init__(self) -> None:
+        """
+        Constructor method of NotEndableError
+        """
+        super().__init__(event="end session", state="not 'running'")
+
+
+class AlreadyInterruptedError(SessionStateError):
+    """
+    An error raised when trying to interrupt a session that is already 'interrupted'.
+
+    Inherits from SessionStateError, uses "interrupt session" as impossible operation
+    and "interrupted" as problematic session state.
+    """
+    def __init__(self) -> None:
+        """
+        Constructor method of AlreadyInterruptedError
+        """
+        super().__init__(event="interrupt session", state="interrupted")
+
+
+class NotInterruptedError(SessionStateError):
+    """
+    An error raised when trying to resume a session that is not currently 'interrupted'.
+
+    Inherits from SessionStateError, uses "resume session" as impossible operation
+    and "not interrupted" as problematic session state.
+    """
+    def __init__(self) -> None:
+        """
+        Constructor method of NotInterruptedError
+        """
+        super().__init__(event="resume session", state="not interrupted")
