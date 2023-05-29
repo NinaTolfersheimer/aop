@@ -1,2 +1,4 @@
 astropy~=5.0.4
 setuptools~=61.2.0
+numpy~=1.24.3
+aop~=1.0
