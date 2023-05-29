@@ -1,5 +1,5 @@
 # aop
-aop is a Python module that implements the [aop standard v1.0](https://tolfersheim.ddns.net/index.php/s/GabziFRsMD7FLeY) for amateur astronomical observation logs.
+aop is a Python package that implements the [aop standard v1.0](https://tolfersheim.ddns.net/index.php/s/GabziFRsMD7FLeY) for amateur astronomical observation logs.
 
 Are you an amateur astronomer or astrophotographer who has some ambitions to document your observations in a clean, meaningfull way? Maybe you are currently working on a small, home-made research project or maybe you are just struggeling to remember the order of all the calibration frames you took last night. Either way, the aop standard is for you! It provides a clear and straightforward standard for the logging of amateur observations of the night sky. aop is the Python module that implements this standard. Nina Tolfersheimer Industries, the developer of both the standard and the module, recommend the use of [Gala](https://ninatolfersheimer.github.io/gala) to make it easy to use.
 
