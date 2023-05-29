@@ -1,5 +1,6 @@
 """
-@author: Amélie Solveigh Hohe
+:Author: Amélie Solveigh Hohe
+:Contact: nina.tolfersheimer@posteo.de
 
 This module contains auxiliary classes and functions for the aop package.
 """
