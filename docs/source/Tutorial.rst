@@ -2,4 +2,4 @@ Tutorial
 ========
 
 Soon, there will be a tutorial here.
-I promise!
+I promise! For real!
