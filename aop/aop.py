@@ -190,6 +190,9 @@ class Session:
         if not path.isdir(filepath):
             raise NotADirectoryError("the filepath you provided is not a directory!")
 
+        self.started = False
+        """Whether the Session.start() method has already been called on this instance."""
+
         self.obsID = None
         """The unique observation ID generated using the :func:`generate_observation_id()`
         function."""
@@ -318,6 +321,7 @@ class Session:
         self.parameters["temp"] = self.temp
         self.parameters["pressure"] = self.pressure
         self.parameters["humidity"] = self.humidity
+        self.parameters["started"] = self.started
 
     def __repr__(self) -> str:
         """
@@ -360,6 +364,9 @@ class Session:
         # initialize session's state to "running"
         self.state = "running"
         self.parameters["state"] = "running"
+
+        self.started = True
+        self.parameters["started"] = True
 
         # generate a unique observation ID and store it as attribute
         self.obsID = generate_observation_id()
@@ -480,7 +487,19 @@ class Session:
             observation to be interrupted at. Can also be "current", in which case
             the current UTC datetime will be used, defaults to "current".
         :type time: ``str``, optional
+
+        :raises SessionNotStartedError: If the session has not yet been started.
+        :raises NotInterruptableError: If the session is not currently "running".
+        :raises AlreadyInterruptedError: If the session is already interrupted.
         """
+
+        # make sure interrupting makes sense
+        if not self.started:
+            raise SessionNotStartedError("interrupt session")
+        if not self.state == "running":
+            raise NotInterruptableError
+        if self.interrupted:
+            raise AlreadyInterruptedError
 
         # set interrupted flag to True
         self.interrupted = True
@@ -506,7 +525,19 @@ class Session:
             observation to be resumed at. Can also be "current", in which case the
             current UTC datetime will be used, defaults to "current".
         :type time: ``str``, optional
+
+        :raises SessionNotStartedError: If the session has not yet been started.
+        :raises NotResumableError: If the session is not currently "running".
+        :raises NotInterruptedError: If the session is not interrupted.
         """
+
+        # make sure resuming makes sense
+        if not self.started:
+            raise SessionNotStartedError("resume session")
+        if not self.state == "running":
+            raise NotResumableError
+        if not self.interrupted:
+            raise NotInterruptedError
 
         # set interrupted flag to False again
         self.interrupted = False
@@ -534,7 +565,16 @@ class Session:
             observation to be aborted at. Can also be "current", in which case the
             current UTC datetime will be used, defaults to "current".
         :type time: ``str``, optional
+
+        :raises SessionNotStartedError: If the session has not yet been started.
+        :raises NotAbortableError: If the session is not currently "running".
         """
+
+        # make sure aborting makes sense
+        if not self.started:
+            raise SessionNotStartedError("abort session")
+        if not self.state == "running":
+            raise NotAbortableError
 
         # set state flag to "aborted"
         self.state = "aborted"
@@ -561,7 +601,16 @@ class Session:
             observation to be ended at. Can also be "current", in which case the
             current UTC datetime will be used, defaults to "current".
         :type time: ``str``, optional
+
+        :raises SessionNotStartedError: If the session has not yet been started.
+        :raises NotEndableError: If the session is not currently "running".
         """
+
+        # make sure ending makes sense
+        if not self.started:
+            raise SessionNotStartedError("end session")
+        if not self.state == "running":
+            raise NotEndableError
 
         # set state flag to "ended"
         self.state = "ended"
@@ -588,7 +637,16 @@ class Session:
             comment to be added at. Can also be "current", in which case the
             current UTC datetime will be used, defaults to "current".
         :type time: ``str``, optional
+
+        :raises SessionNotStartedError: If the session has not yet been started.
+        :raises SessionStateError: If the session is not currently "running".
         """
+
+        # make sure commenting makes sense
+        if not self.started:
+            raise SessionNotStartedError("add comment")
+        if not self.state == "running":
+            raise SessionStateError(event="add comment", state="not 'running'")
 
         self.__write_to_aop(self, "OBSC", comment, time)
 
@@ -619,6 +677,8 @@ class Session:
             current UTC datetime will be used, defaults to "current".
         :type time: ``str``, optional
 
+        :raises SessionNotStartedError: If the session has not yet been started.
+        :raises SessionStateError: If the session is not currently "running".
         :raises ValueError: If an improper value is passed in the 'severity' argument, that is
             anything different from:
                 * "potential"
@@ -628,6 +688,12 @@ class Session:
                 * "major"
                 * "m".
         """
+
+        # make sure reporting an issue makes sense
+        if not self.started:
+            raise SessionNotStartedError("report issue")
+        if not self.state == "running":
+            raise SessionStateError(event="report issue", state="not 'running'")
 
         if severity == "potential" or severity == "p":
             self.__write_to_aop(self, "ISSU", f"Potential Issue: {message}", time)
@@ -657,8 +723,16 @@ class Session:
             current UTC datetime will be used, defaults to "current".
         :type time: ``str``, optional
 
+        :raises SessionNotStartedError: If the session has not yet been started.
+        :raises SessionStateError: If the session is not currently "running".
         :raises TypeError: If the ``targets`` argument is not of type ``list``.
         """
+
+        # make sure pointing to name makes sense
+        if not self.started:
+            raise SessionNotStartedError("point to name")
+        if not self.state == "running":
+            raise SessionStateError(event="point to name", state="not 'running'")
 
         # unfortunately now you have to provide a list for targets, but this
         # way, a custom time can be set conveniently
@@ -696,10 +770,18 @@ class Session:
             current UTC datetime will be used, defaults to "current".
         :type time: ``str``, optional
 
+        :raises SessionNotStartedError: If the session has not yet been started.
+        :raises SessionStateError: If the session is not currently "running".
         :raises TypeError: If 'ra' or 'dec' is not of type 'float'.
         :raises ValueError: If 'ra' is not 0.0h <= 'ra' < 24.0h.
         :raises ValueError: If 'dec' is not -90.0° <= 'dec' <= 90.0°.
         """
+
+        # make sure pointing to coords makes sense
+        if not self.started:
+            raise SessionNotStartedError("point to coords")
+        if not self.state == "running":
+            raise SessionStateError(event="point to coords", state="not 'running'")
 
         # exclude invalid coord values
         if not type(ra) == float:
@@ -773,6 +855,8 @@ class Session:
             current UTC datetime will be used, defaults to "current".
         :type time: ``str``, optional
 
+        :raises SessionNotStartedError: If the session has not yet been started.
+        :raises SessionStateError: If the session is not currently "running".
         :raises TypeError: If one of the parameters is not of the required type:
                 * n: int
                 * ftype: str
@@ -803,6 +887,12 @@ class Session:
                 * "pf"
                 * "p".
         """
+
+        # make sure frame taking makes sense
+        if not self.started:
+            raise SessionNotStartedError("take frame")
+        if not self.state == "running":
+            raise SessionStateError(event="take frame", state="not 'running'")
 
         # type check
         if not type(n) == int:
@@ -870,7 +960,16 @@ class Session:
             condition update to be reported at. Can also be "current", in which
             case the current UTC datetime will be used, defaults to "current".
         :type time: ``str``, optional
+
+        :raises SessionNotStartedError: If the session has not yet been started.
+        :raises SessionStateError: If the session is not currently "running".
         """
+
+        # make sure reporting conditions makes sense
+        if not self.started:
+            raise SessionNotStartedError("report observing conditions")
+        if not self.state == "running":
+            raise SessionStateError(event="report observing conditions", state="not 'running'")
 
         if type(description) == str:
             # if a description is provided, set the conditionDescription
