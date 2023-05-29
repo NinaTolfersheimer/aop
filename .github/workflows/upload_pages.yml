@@ -3,8 +3,8 @@ name: Deploy static content to Pages
 
 on:
   # Runs on pushes targeting the default branch
-  #push:
-  #  branches: ["master"]
+  push:
+    branches: ["master"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -29,15 +29,5 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
-        with:
-          # Upload entire repository
-          path: '.'
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
+      - name: Sphinx docs to GitHub Pages
+        uses: uibcdf/action-sphinx-docs-to-gh-pages@v2.0.0
