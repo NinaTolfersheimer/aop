@@ -1,0 +1,29 @@
+aop package
+===========
+
+Submodules
+----------
+
+aop.aop module
+--------------
+
+.. automodule:: aop.aop
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aop.tools module
+----------------
+
+.. automodule:: aop.tools
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: aop
+   :members:
+   :undoc-members:
+   :show-inheritance:

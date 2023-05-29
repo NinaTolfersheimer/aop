@@ -1,0 +1,1032 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
+
+    <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
+        <title>aop.aop - aop 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">aop 1.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  
+  <span class="sidebar-brand-text">aop 1.0 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../../index.html">API Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">aop</span></code></a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of aop</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">aop.aop</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tools/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">aop.tools</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="module-aop.aop">
+<span id="aop-aop"></span><h1><a class="reference internal" href="#module-aop.aop" title="aop.aop"><code class="xref py py-mod docutils literal notranslate"><span class="pre">aop.aop</span></code></a><a class="headerlink" href="#module-aop.aop" title="Permalink to this heading">#</a></h1>
+<dl class="field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Amélie Solveigh Hohe</p>
+</dd>
+<dt class="field-even">Contact<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="mailto:nina&#46;tolfersheimer&#37;&#52;&#48;posteo&#46;de">nina<span>&#46;</span>tolfersheimer<span>&#64;</span>posteo<span>&#46;</span>de</a></p>
+</dd>
+</dl>
+<p>This module contains the main classes and functions of the aop package.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">#</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading">#</a></h3>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aop.aop.Session" title="aop.aop.Session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span></code></a></p></td>
+<td><p>A class representing an astronomical observing session.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this heading">#</a></h3>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aop.aop.current_jd" title="aop.aop.current_jd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_jd</span></code></a>(→ numpy.float64)</p></td>
+<td><p>Returns the Julian Date for the current UTC or a custom datetime.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aop.aop.generate_observation_id" title="aop.aop.generate_observation_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_observation_id</span></code></a>(→ str)</p></td>
+<td><p>This function generates a unique observation ID.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aop.aop.create_entry_id" title="aop.aop.create_entry_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_entry_id</span></code></a>(→ str)</p></td>
+<td><p>Creates a unique identifier for each and every entry in an .aop protocol.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aop.aop.parse_session" title="aop.aop.parse_session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_session</span></code></a>(→ Session)</p></td>
+<td><p>This function parses a session from memory to a new Session object.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="aop.aop.current_jd">
+<span class="sig-prename descclassname"><span class="pre">aop.aop.</span></span><span class="sig-name descname"><span class="pre">current_jd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'current'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.float64</span></span></span><a class="headerlink" href="#aop.aop.current_jd" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the Julian Date for the current UTC or a custom datetime.</p>
+<p>It makes use of astropy’s <code class="docutils literal notranslate"><span class="pre">Time</span></code> class to represent the datetime given as
+a Julian Date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>time</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – An ISO 8601 conform string of the UTC datetime you want to be converted
+to a Julian Date. If <code class="docutils literal notranslate"><span class="pre">time</span></code> is “current”, the current UTC
+datetime will be used, defaults to “current”.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – If the <code class="docutils literal notranslate"><span class="pre">time</span></code> argument is not of type <code class="docutils literal notranslate"><span class="pre">str</span></code>.</p></li>
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.InvalidTimeStringError" title="aop.tools.InvalidTimeStringError"><strong>InvalidTimeStringError</strong></a> – If the <code class="docutils literal notranslate"><span class="pre">time</span></code> argument is of type <code class="docutils literal notranslate"><span class="pre">str</span></code> but not interpretable as
+representing a time to astropy.time.Time.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The Julian Date corresponding to the datetime provided.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">numpy.float64</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aop.aop.generate_observation_id">
+<span class="sig-prename descclassname"><span class="pre">aop.aop.</span></span><span class="sig-name descname"><span class="pre">generate_observation_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">digits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#aop.aop.generate_observation_id" title="Permalink to this definition">#</a></dt>
+<dd><p>This function generates a unique observation ID.</p>
+<p>The ID is generated as such: YYYY-mm-dd-HH-MM-SS-uuuuuuuuuu,
+where:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>YYYY: current UTC year</p></li>
+<li><p>mm: current UTC month</p></li>
+<li><p>dd: current UTC day</p></li>
+<li><p>HH: current UTC hour</p></li>
+<li><p>MM: current UTC minute</p></li>
+<li><p>SS: current UTC second</p></li>
+<li><p>uuuuuuuuuu: a <code class="docutils literal notranslate"><span class="pre">digits</span></code>-long unique identifier (10 digits per default)</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>digits</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>, optional) – The number of digits to be used for the unique identifier part of
+the observation ID, defaults to 10.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The generated observation ID.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aop.aop.create_entry_id">
+<span class="sig-prename descclassname"><span class="pre">aop.aop.</span></span><span class="sig-name descname"><span class="pre">create_entry_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'current'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#aop.aop.create_entry_id" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a unique identifier for each and every entry in an .aop protocol.
+This identifier is unique even across observations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – If equal to “current”, the current UTC datetime is used for
+entry ID creation. You can also pass an ISO 8601 conform string to
+time, if the time of the entry is not the current time this method is
+called, defaults to “current”.</p></li>
+<li><p><strong>digits</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>, optional) – The number of digits to use for the unique part of the entry ID, defaults to 30.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – If time is not a string.</p></li>
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.InvalidTimeStringError" title="aop.tools.InvalidTimeStringError"><strong>InvalidTimeStringError</strong></a> – If a string different from “current” is provided as <code class="docutils literal notranslate"><span class="pre">time</span></code> argument, but
+it is not ISO 8601 conform and therefore does not constitute a valid time string.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p>The entry ID generated. It follows the syntax YYYYMMDDhhmmssffffff-u,
+where:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>YYYY   is the specified UTC year,</p></li>
+<li><p>MM     is the specified UTC month,</p></li>
+<li><p>DD     is the specified UTC day,</p></li>
+<li><p>hh     is the specified UTC hour,</p></li>
+<li><p>mm     is the specified UTC month,</p></li>
+<li><p>ss     is the specified UTC second,</p></li>
+<li><p>ffffff is the specified fraction of a UTC second and</p></li>
+<li><p>u      represents ‘digits’ of unique identifier characters.</p></li>
+</ul>
+</div></blockquote>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aop.aop.Session">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aop.aop.</span></span><span class="sig-name descname"><span class="pre">Session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aop.aop.Session" title="Permalink to this definition">#</a></dt>
+<dd><p>A class representing an astronomical observing session.</p>
+<p>The Session class provides several public methods representing different
+actions and events that occur throughout an astronomical observation.
+It is logged according to the Astronomical Observation Protocol Standard v1.0.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aop.aop.Session.started">
+<span class="sig-name descname"><span class="pre">started</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#aop.aop.Session.started" title="Permalink to this definition">#</a></dt>
+<dd><p>Whether the Session.start() method has already been called on this instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aop.aop.Session.obsID">
+<span class="sig-name descname"><span class="pre">obsID</span></span><a class="headerlink" href="#aop.aop.Session.obsID" title="Permalink to this definition">#</a></dt>
+<dd><p>The unique observation ID generated using the <a class="reference internal" href="#aop.aop.generate_observation_id" title="aop.aop.generate_observation_id"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_observation_id()</span></code></a>
+function.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aop.aop.Session.filepath">
+<span class="sig-name descname"><span class="pre">filepath</span></span><a class="headerlink" href="#aop.aop.Session.filepath" title="Permalink to this definition">#</a></dt>
+<dd><p>The path where the implementing script wants aop to store its files. This could be a part of the implementing
+script’s installation directory, for example.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aop.aop.Session.state">
+<span class="sig-name descname"><span class="pre">state</span></span><a class="headerlink" href="#aop.aop.Session.state" title="Permalink to this definition">#</a></dt>
+<dd><p>A status flag indicating the current status of the observing session.
+The class methods set this flag to either</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>“running”,</p></li>
+<li><p>“aborted” or</p></li>
+<li><p>“ended”.</p></li>
+</ul>
+</div></blockquote>
+<p>Initialized in <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> to None, updated in <code class="docutils literal notranslate"><span class="pre">start()</span></code> to “running”.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aop.aop.Session.interrupted">
+<span class="sig-name descname"><span class="pre">interrupted</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#aop.aop.Session.interrupted" title="Permalink to this definition">#</a></dt>
+<dd><p>A status flag indicating whether the session is currently interrupted.
+Initialized as False.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aop.aop.Session.conditionDescription">
+<span class="sig-name descname"><span class="pre">conditionDescription</span></span><a class="headerlink" href="#aop.aop.Session.conditionDescription" title="Permalink to this definition">#</a></dt>
+<dd><p>A short description of the observing conditions.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aop.aop.Session.temp">
+<span class="sig-name descname"><span class="pre">temp</span></span><a class="headerlink" href="#aop.aop.Session.temp" title="Permalink to this definition">#</a></dt>
+<dd><p>The temperature at the observing site in °C.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aop.aop.Session.pressure">
+<span class="sig-name descname"><span class="pre">pressure</span></span><a class="headerlink" href="#aop.aop.Session.pressure" title="Permalink to this definition">#</a></dt>
+<dd><p>The air pressure at the observing site in hPa.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aop.aop.Session.humidity">
+<span class="sig-name descname"><span class="pre">humidity</span></span><a class="headerlink" href="#aop.aop.Session.humidity" title="Permalink to this definition">#</a></dt>
+<dd><p>The air humidity at the observing site in %.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aop.aop.Session.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#aop.aop.Session.__repr__" title="Permalink to this definition">#</a></dt>
+<dd><p>A Session object is represented by its attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A string containing all the instance’s attributes and their values
+in line format.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aop.aop.Session.start">
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'current'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#aop.aop.Session.start" title="Permalink to this definition">#</a></dt>
+<dd><p>This method is called to start the observing session.</p>
+<p>By not starting the observation when a Session object is created, it is
+possible to prepare the Session object pre-observation as well as
+parse existing protocols from memory into a new Session object. It
+changes the Session’s “state” flag to “running” (attribute and
+parameter), as well as generating an observation ID, setting up a
+directory for the protocol and parameter log to live in, and writing
+the initial files to that directory. It also writes a Session Event
+“SEEV SESSION %obsID% STARTED” to .aop.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>time</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – An ISO 8601 conform string of the UTC datetime you want your
+observation to start. Can also be “current”, in which case the current
+UTC datetime will be used, defaults to “current”.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>PermissionError</strong> – If the user does not have the adequate access rights for reading from or writing to the
+.aol or .aop file.</p></li>
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.AopFileAlreadyExistsError" title="aop.tools.AopFileAlreadyExistsError"><strong>AopFileAlreadyExistsError</strong></a> – If the .aop file the method tries to create already exists.</p></li>
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.AolFileAlreadyExistsError" title="aop.tools.AolFileAlreadyExistsError"><strong>AolFileAlreadyExistsError</strong></a> – If the .aol file the method tries to create already exists.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aop.aop.Session.__write_to_aop">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__write_to_aop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opcode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">argument</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'current'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#aop.aop.Session.__write_to_aop" title="Permalink to this definition">#</a></dt>
+<dd><p>This pseudo-private method is called to update the .aop protocol file.</p>
+<p>For the syntax, check with the Astronomical Observation Protocol Syntax
+Guide.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>opcode</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – The operation code of the event to be written to protocol, as
+described in the AOP Syntax Guide.</p></li>
+<li><p><strong>argument</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – Whatever is to be written to the argument position in the .aop
+protocol entry.</p></li>
+<li><p><strong>time</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – An ISO 8601 conform string of the UTC datetime you want to use. Can also be “current”, in which
+case the current UTC datetime will be used.
+In most cases, however, the calling method will pass its own time
+argument on to __write_to_aop(), defaults to “current”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>PermissionError</strong> – If the user does not have the adequate access rights for writing to the .aop file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aop.aop.Session.__write_to_aol">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__write_to_aol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assigned_value</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#aop.aop.Session.__write_to_aol" title="Permalink to this definition">#</a></dt>
+<dd><p>This pseudo-private method is used to update the .aol parameter log.</p>
+<p>It takes two arguments, the first being the parameter name being updated,
+the second one being the value it is assigned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parameter</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – The name of the parameter being updated.</p></li>
+<li><p><strong>assigned_value</strong> (<em>any</em>) – The value the parameter should be assigned. Typically, this
+is a string or boolean.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>PermissionError</strong> – If the user does not have the adequate access rights for reading from the .aol file.</p></li>
+<li><p><strong>PermissionError</strong> – If the user does not have the adequate access rights for writing to the .aol file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aop.aop.Session.interrupt">
+<span class="sig-name descname"><span class="pre">interrupt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'current'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#aop.aop.Session.interrupt" title="Permalink to this definition">#</a></dt>
+<dd><p>This method interrupts the session.</p>
+<p>It sets the Session’s <code class="docutils literal notranslate"><span class="pre">interrupted</span></code> flag to True in the instance
+attribute as well as the <code class="docutils literal notranslate"><span class="pre">parameter</span></code> attribute. After this, it writes a
+Session Event “SEEV SESSION INTERRUPTED” to the protocol and updates
+the .aol parameter log.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>time</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – An ISO 8601 conform string of the UTC datetime you want your
+observation to be interrupted at. Can also be “current”, in which case
+the current UTC datetime will be used, defaults to “current”.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.SessionNotStartedError" title="aop.tools.SessionNotStartedError"><strong>SessionNotStartedError</strong></a> – If the session has not yet been started.</p></li>
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.NotInterruptableError" title="aop.tools.NotInterruptableError"><strong>NotInterruptableError</strong></a> – If the session is not currently “running”.</p></li>
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.AlreadyInterruptedError" title="aop.tools.AlreadyInterruptedError"><strong>AlreadyInterruptedError</strong></a> – If the session is already interrupted.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aop.aop.Session.resume">
+<span class="sig-name descname"><span class="pre">resume</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'current'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#aop.aop.Session.resume" title="Permalink to this definition">#</a></dt>
+<dd><p>This method resumes the session.</p>
+<p>It sets the Session’s <code class="docutils literal notranslate"><span class="pre">interrupted</span></code> flag to False in the instance
+attribute as well as the <code class="docutils literal notranslate"><span class="pre">parameter</span></code> attribute. After this, it writes a
+Session Event “SEEV SESSION RESUMED” to the protocol and updates the
+.aol parameter log.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>time</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – An ISO 8601 conform string of the UTC datetime you want your
+observation to be resumed at. Can also be “current”, in which case the
+current UTC datetime will be used, defaults to “current”.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.SessionNotStartedError" title="aop.tools.SessionNotStartedError"><strong>SessionNotStartedError</strong></a> – If the session has not yet been started.</p></li>
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.NotResumableError" title="aop.tools.NotResumableError"><strong>NotResumableError</strong></a> – If the session is not currently “running”.</p></li>
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.NotInterruptedError" title="aop.tools.NotInterruptedError"><strong>NotInterruptedError</strong></a> – If the session is not interrupted.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aop.aop.Session.abort">
+<span class="sig-name descname"><span class="pre">abort</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reason</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'current'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#aop.aop.Session.abort" title="Permalink to this definition">#</a></dt>
+<dd><p>This method aborts the session while providing a reason for doing so.</p>
+<p>It sets the Session’s <code class="docutils literal notranslate"><span class="pre">state</span></code> flag to “aborted” in the instance
+attribute as well as the <code class="docutils literal notranslate"><span class="pre">parameter</span></code> attribute. After this, it writes a
+Session Event “SEEV %reason%: SESSION %obsID% ABORTED” to the protocol
+and updates the .aol parameter log.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reason</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – The reason why this session had to be aborted.</p></li>
+<li><p><strong>time</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – An ISO 8601 conform string of the UTC datetime you want your
+observation to be aborted at. Can also be “current”, in which case the
+current UTC datetime will be used, defaults to “current”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.SessionNotStartedError" title="aop.tools.SessionNotStartedError"><strong>SessionNotStartedError</strong></a> – If the session has not yet been started.</p></li>
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.NotAbortableError" title="aop.tools.NotAbortableError"><strong>NotAbortableError</strong></a> – If the session is not currently “running”.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aop.aop.Session.end">
+<span class="sig-name descname"><span class="pre">end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'current'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#aop.aop.Session.end" title="Permalink to this definition">#</a></dt>
+<dd><p>This method is called to end the observing session.</p>
+<p>It sets the Session’s <code class="docutils literal notranslate"><span class="pre">state</span></code> flag to “ended” in the instance
+attribute as well as the <code class="docutils literal notranslate"><span class="pre">parameter</span></code> attribute. After this, it writes a
+Session Event “SEEV SESSION %obsID% ENDED” to the protocol and updates
+the .aol parameter log.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>time</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – An ISO 8601 conform string of the UTC datetime you want your
+observation to be ended at. Can also be “current”, in which case the
+current UTC datetime will be used, defaults to “current”.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.SessionNotStartedError" title="aop.tools.SessionNotStartedError"><strong>SessionNotStartedError</strong></a> – If the session has not yet been started.</p></li>
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.NotEndableError" title="aop.tools.NotEndableError"><strong>NotEndableError</strong></a> – If the session is not currently “running”.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aop.aop.Session.comment">
+<span class="sig-name descname"><span class="pre">comment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'current'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#aop.aop.Session.comment" title="Permalink to this definition">#</a></dt>
+<dd><p>This method adds an observer’s comment to the protocol.</p>
+<p>It writes an Observer’s Comment “OBSC %comment%” to the protocol, where
+the AOP argument is whatever string is passed as the ‘comment’ argument
+to the method verbatim.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>comment</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – Whatever you want your comment to read in the protocol.</p></li>
+<li><p><strong>time</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – An ISO 8601 conform string of the UTC datetime you want your
+comment to be added at. Can also be “current”, in which case the
+current UTC datetime will be used, defaults to “current”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.SessionNotStartedError" title="aop.tools.SessionNotStartedError"><strong>SessionNotStartedError</strong></a> – If the session has not yet been started.</p></li>
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.SessionStateError" title="aop.tools.SessionStateError"><strong>SessionStateError</strong></a> – If the session is not currently “running”.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aop.aop.Session.issue">
+<span class="sig-name descname"><span class="pre">issue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">severity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'current'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#aop.aop.Session.issue" title="Permalink to this definition">#</a></dt>
+<dd><p>This method is called to report an issue to the protocol.</p>
+<p>It evaluates the <code class="docutils literal notranslate"><span class="pre">severity</span></code> argument and after that writes the
+corresponding ISSU (Issue) to the protocol:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>“potential”/”p”: “ISSU Potential Issue: %message%”</p></li>
+<li><p>“normal”/”n”: “ISSU Normal Issue: %message%”</p></li>
+<li><p>“major”/”m”: “ISSU Major Issue: %message%”</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>severity</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – <p>An indicator of the issue’s severity. It has to be one of the
+following strings:</p>
+<blockquote>
+<div><ul>
+<li><p>”potential”</p></li>
+<li><p>”p”</p></li>
+<li><p>”normal”</p></li>
+<li><p>”n”</p></li>
+<li><p>”major”</p></li>
+<li><p>”m”.</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+<li><p><strong>message</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – A short description of the issue that is printed to the protocol
+verbatim.</p></li>
+<li><p><strong>time</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – An ISO 8601 conform string of the UTC datetime you want your
+issue to be reported at. Can also be “current”, in which case the
+current UTC datetime will be used, defaults to “current”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.SessionNotStartedError" title="aop.tools.SessionNotStartedError"><strong>SessionNotStartedError</strong></a> – If the session has not yet been started.</p></li>
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.SessionStateError" title="aop.tools.SessionStateError"><strong>SessionStateError</strong></a> – If the session is not currently “running”.</p></li>
+<li><p><strong>ValueError</strong> – <p>If an improper value is passed in the ‘severity’ argument, that is
+anything different from:</p>
+<blockquote>
+<div><ul>
+<li><p>”potential”</p></li>
+<li><p>”p”</p></li>
+<li><p>”normal”</p></li>
+<li><p>”n”</p></li>
+<li><p>”major”</p></li>
+<li><p>”m”.</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aop.aop.Session.point_to_name">
+<span class="sig-name descname"><span class="pre">point_to_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'current'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#aop.aop.Session.point_to_name" title="Permalink to this definition">#</a></dt>
+<dd><p>This method indicates the pointing to a target identified by name.</p>
+<p>It starts by evaluating the ‘targets’ argument provided to the method
+and constructing a comma-separated list of targets, which is then
+written in the AOP argument position in the Pointing “POIN Pointing at
+target(s): %list of targets%” that is being written to the protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<code class="docutils literal notranslate"><span class="pre">list[any]</span></code>) – A list object that contains whatever objects represent the targets,
+most likely strings, but it could be any other object.</p></li>
+<li><p><strong>time</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – An ISO 8601 conform string of the UTC datetime you want your
+pointing to be reported at. Can also be “current”, in which case the
+current UTC datetime will be used, defaults to “current”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.SessionNotStartedError" title="aop.tools.SessionNotStartedError"><strong>SessionNotStartedError</strong></a> – If the session has not yet been started.</p></li>
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.SessionStateError" title="aop.tools.SessionStateError"><strong>SessionStateError</strong></a> – If the session is not currently “running”.</p></li>
+<li><p><strong>TypeError</strong> – If the <code class="docutils literal notranslate"><span class="pre">targets</span></code> argument is not of type <code class="docutils literal notranslate"><span class="pre">list</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aop.aop.Session.point_to_coords">
+<span class="sig-name descname"><span class="pre">point_to_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ra</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'current'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#aop.aop.Session.point_to_coords" title="Permalink to this definition">#</a></dt>
+<dd><p>This method indicates the pointing to ICRS coordinates.</p>
+<p>It takes a ‘ra’ argument for right ascension and a ‘dec’ argument for
+declination. After that, a Pointing “Pointing at coordinates: R.A.:
+%ra% Dec.: %dec%” is written to the protocol. Provide decimal degrees
+for declination and decimal hours for right ascension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ra</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – Right ascension in the ICRS coordinate framework.</p></li>
+<li><p><strong>dec</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – Declination in the ICRS coordinate framework.</p></li>
+<li><p><strong>time</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – An ISO 8601 conform string of the UTC datetime you want your
+pointing to be reported at. Can also be “current”, in which case the
+current UTC datetime will be used, defaults to “current”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.SessionNotStartedError" title="aop.tools.SessionNotStartedError"><strong>SessionNotStartedError</strong></a> – If the session has not yet been started.</p></li>
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.SessionStateError" title="aop.tools.SessionStateError"><strong>SessionStateError</strong></a> – If the session is not currently “running”.</p></li>
+<li><p><strong>TypeError</strong> – If ‘ra’ or ‘dec’ is not of type ‘float’.</p></li>
+<li><p><strong>ValueError</strong> – If ‘ra’ is not 0.0h &lt;= ‘ra’ &lt; 24.0h.</p></li>
+<li><p><strong>ValueError</strong> – If ‘dec’ is not -90.0° &lt;= ‘dec’ &lt;= 90.0°.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aop.aop.Session.take_frame">
+<span class="sig-name descname"><span class="pre">take_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ftype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iso</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'current'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#aop.aop.Session.take_frame" title="Permalink to this definition">#</a></dt>
+<dd><p>This method reports the taking of one or more frame(s) of the same target and the camera settings used.</p>
+<p>It evaluates the type of frame provided in the <code class="docutils literal notranslate"><span class="pre">ftype</span></code> parameter to
+arrive at a string to be written to the protocol as frame type:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>“science frame”/”science”/”sf”/”s”: “science”</p></li>
+<li><p>“dark frame”/”dark”/”df”/”d”: “dark”</p></li>
+<li><p>“flat frame”/”flat”/”ff”/”f”: “flat”</p></li>
+<li><p>“bias frame”/”bias”/”bf”/”b”: “bias”</p></li>
+<li><p>“pointing frame”/”pointing”/”pf”/”p”: “pointing”</p></li>
+</ul>
+</div></blockquote>
+<p>Finally, the method writes a Frame “FRAM %n% %frame type% frame(s)
+taken with settings: Exp.t.: %expt%s, Ap.: f/%ap%, ISO: %ISO%” to the
+protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – Number of frames of the specified frame type and settings that were
+taken of the same target.</p></li>
+<li><p><strong>ftype</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – Type of frame, ftype must not be anything other than:
+* “science frame”
+* “science”
+* “sf”
+* “s”
+* “dark frame”
+* “dark”
+* “df”
+* “d”
+* “flat frame”
+* “flat”
+* “ff”
+* “f”
+* “bias frame”
+* “bias”
+* “bf”
+* “b”
+* “pointing frame”
+* “pointing”
+* “pf”
+* “p”.</p></li>
+<li><p><strong>iso</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – ISO setting that was used for the frame(s).</p></li>
+<li><p><strong>ap</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – The denominator of the aperture setting that was used for the
+frame(s). For example, if f/5.6 was used, provide ap=5.6 to the
+method.</p></li>
+<li><p><strong>expt</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – Exposure time that was used for the frame(s), given in seconds.</p></li>
+<li><p><strong>time</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – An ISO 8601 conform string of the UTC datetime you want your
+frame(s) to be reported at. Can also be “current”, in which case the
+current UTC datetime will be used, defaults to “current”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.SessionNotStartedError" title="aop.tools.SessionNotStartedError"><strong>SessionNotStartedError</strong></a> – If the session has not yet been started.</p></li>
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.SessionStateError" title="aop.tools.SessionStateError"><strong>SessionStateError</strong></a> – If the session is not currently “running”.</p></li>
+<li><p><strong>TypeError</strong> – If one of the parameters is not of the required type:
+* n: int
+* ftype: str
+* expt: float
+* ap: float
+* iso: int</p></li>
+<li><p><strong>ValueError</strong> – <p>If an improper value is passed in the ‘ftype’ argument, that is
+anything other than:</p>
+<blockquote>
+<div><ul>
+<li><p>”science frame”</p></li>
+<li><p>”science”</p></li>
+<li><p>”sf”</p></li>
+<li><p>”s”</p></li>
+<li><p>”dark frame”</p></li>
+<li><p>”dark”</p></li>
+<li><p>”df”</p></li>
+<li><p>”d”</p></li>
+<li><p>”flat frame”</p></li>
+<li><p>”flat”</p></li>
+<li><p>”ff”</p></li>
+<li><p>”f”</p></li>
+<li><p>”bias frame”</p></li>
+<li><p>”bias”</p></li>
+<li><p>”bf”</p></li>
+<li><p>”b”</p></li>
+<li><p>”pointing frame”</p></li>
+<li><p>”pointing”</p></li>
+<li><p>”pf”</p></li>
+<li><p>”p”.</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aop.aop.Session.condition_report">
+<span class="sig-name descname"><span class="pre">condition_report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pressure</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">humidity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'current'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#aop.aop.Session.condition_report" title="Permalink to this definition">#</a></dt>
+<dd><p>This method reports a condition description or measurement.</p>
+<p>Every argument is optional, just pass the values for the arguments you
+want to protocol. Each argument will be processed completely
+separately, so a separate protocol entry will be produced for every
+argument you provide. For each type of condition report, a
+corresponding flag will be set as an instance attribute as well as a
+parameter. This flag update will also be written to the parameter log.
+In case a description is provided, a Condition Description “CDES
+%description%” is written to the protocol, if a temperature, pressure
+or humidity is provided, however, a Condition Measurement is written to
+protocol for each measurement provided, respectively:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>“CMES Temperature: %temp%°C” and/or</p></li>
+<li><p>“CMES Air Pressure: %pressure% hPa” and/or</p></li>
+<li><p>“CMES Air Humidity: %humidity%%”</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>description</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – A short description of every relevant element influencing the
+overall observing description, but do not provide any measurements,
+as these are a Condition Measurement rather than a Condition
+Description, defaults to None.</p></li>
+<li><p><strong>temp</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>, optional) – The measured temperature in °C, defaults to None.</p></li>
+<li><p><strong>pressure</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>, optional) – The measured air pressure in hPa, defaults to None.</p></li>
+<li><p><strong>humidity</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>, optional) – The measured air humidity in %, defaults to None.</p></li>
+<li><p><strong>time</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – An ISO 8601 conform string of the UTC datetime you want your
+condition update to be reported at. Can also be “current”, in which
+case the current UTC datetime will be used, defaults to “current”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.SessionNotStartedError" title="aop.tools.SessionNotStartedError"><strong>SessionNotStartedError</strong></a> – If the session has not yet been started.</p></li>
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.SessionStateError" title="aop.tools.SessionStateError"><strong>SessionStateError</strong></a> – If the session is not currently “running”.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aop.aop.parse_session">
+<span class="sig-prename descclassname"><span class="pre">aop.aop.</span></span><span class="sig-name descname"><span class="pre">parse_session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#aop.aop.Session" title="aop.aop.Session"><span class="pre">Session</span></a></span></span><a class="headerlink" href="#aop.aop.parse_session" title="Permalink to this definition">#</a></dt>
+<dd><p>This function parses a session from memory to a new Session object.</p>
+<p>Provided with the filepath to the general location where the protocol and
+log files are stored and an observation ID, it reads in the observation
+parameters from the session’s parameter log. This information is then used
+to create a new Session object, which is returned by the function. If it
+has no observationID attribute, it is recreated from the function input.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> (<em>str</em>) – The path to the file where you expect the session directory to reside.
+This is most likely equivalent to the path passed to the Session class
+to create its files in, which in turn is most likely somewhere in the
+installation directory of the implementing script.</p></li>
+<li><p><strong>session_id</strong> (<em>str</em>) – The observationID of the session to be parsed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="../tools/index.html#aop.tools.AolNotFoundError" title="aop.tools.AolNotFoundError"><strong>AolNotFoundError</strong></a> – If there is no .aol file using the specified filepath and session_id.</p></li>
+<li><p><strong>SessionIdDoesntExistOnFilepathError</strong> – If the specified session_id is not in the filepath provided.</p></li>
+<li><p><strong>NotADirectoryError</strong> – If the specified filepath does not constitute a directory.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The new Session object parsed from the stored observation parameters.
+For all intents and purposes, this object is equivalent to the object
+whose parameters were used to parse, and you can use it to continue your
+observation session or protocol just the same. Just be careful not to
+run the Session.start() method again, as this would overwrite the
+existing protocol instead of continuing it!</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#aop.aop.Session" title="aop.aop.Session">Session</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023, Amélie Solveigh Hohe
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">aop.aop</span></code></a><ul>
+<li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#aop.aop.current_jd"><code class="docutils literal notranslate"><span class="pre">current_jd()</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.generate_observation_id"><code class="docutils literal notranslate"><span class="pre">generate_observation_id()</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.create_entry_id"><code class="docutils literal notranslate"><span class="pre">create_entry_id()</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session"><code class="docutils literal notranslate"><span class="pre">Session</span></code></a><ul>
+<li><a class="reference internal" href="#aop.aop.Session.started"><code class="docutils literal notranslate"><span class="pre">Session.started</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.obsID"><code class="docutils literal notranslate"><span class="pre">Session.obsID</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.filepath"><code class="docutils literal notranslate"><span class="pre">Session.filepath</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.state"><code class="docutils literal notranslate"><span class="pre">Session.state</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.interrupted"><code class="docutils literal notranslate"><span class="pre">Session.interrupted</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.conditionDescription"><code class="docutils literal notranslate"><span class="pre">Session.conditionDescription</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.temp"><code class="docutils literal notranslate"><span class="pre">Session.temp</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.pressure"><code class="docutils literal notranslate"><span class="pre">Session.pressure</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.humidity"><code class="docutils literal notranslate"><span class="pre">Session.humidity</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.__repr__"><code class="docutils literal notranslate"><span class="pre">Session.__repr__()</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.start"><code class="docutils literal notranslate"><span class="pre">Session.start()</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.__write_to_aop"><code class="docutils literal notranslate"><span class="pre">Session.__write_to_aop()</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.__write_to_aol"><code class="docutils literal notranslate"><span class="pre">Session.__write_to_aol()</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.interrupt"><code class="docutils literal notranslate"><span class="pre">Session.interrupt()</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.resume"><code class="docutils literal notranslate"><span class="pre">Session.resume()</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.abort"><code class="docutils literal notranslate"><span class="pre">Session.abort()</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.end"><code class="docutils literal notranslate"><span class="pre">Session.end()</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.comment"><code class="docutils literal notranslate"><span class="pre">Session.comment()</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.issue"><code class="docutils literal notranslate"><span class="pre">Session.issue()</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.point_to_name"><code class="docutils literal notranslate"><span class="pre">Session.point_to_name()</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.point_to_coords"><code class="docutils literal notranslate"><span class="pre">Session.point_to_coords()</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.take_frame"><code class="docutils literal notranslate"><span class="pre">Session.take_frame()</span></code></a></li>
+<li><a class="reference internal" href="#aop.aop.Session.condition_report"><code class="docutils literal notranslate"><span class="pre">Session.condition_report()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#aop.aop.parse_session"><code class="docutils literal notranslate"><span class="pre">parse_session()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/scripts/furo.js"></script>
+    </body>
+</html>

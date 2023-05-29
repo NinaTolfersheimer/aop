@@ -1,0 +1,54 @@
+:py:mod:`aop.current_jd`
+========================
+
+.. py:module:: aop.current_jd
+
+.. autoapi-nested-parse::
+
+   @author: Amélie Solveigh Hohe
+
+   This file contains the current_jd function, returning the current Julian Date as necessary for the aop module.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   aop.current_jd.current_jd
+
+
+
+.. py:function:: current_jd(time=-1)
+
+   Returns the Julian Date for the current UTC or a custom datetime.
+
+   It makes use of astropy's 'Time' object to represent the datetime given as
+   a Julian Date.
+
+   Parameters
+   ----------
+   time : str, optional
+       An ISO 8601 conform string of the UTC datetime you want to be converted
+       to a Julian Date. The default is -1, in which case the current UTC
+       datetime will be used.
+
+   Raises
+   ------
+   TypeError
+       If the 'time' argument is not of type 'str'.
+   InvalidTimeStringError
+       If the 'time' argument is of type 'str' but not interpretable as representing a time to astropy.time.Time.
+
+   Returns
+   -------
+   numpy.float64
+       The Julian Date corresponding to the datetime provided.
+
+
+

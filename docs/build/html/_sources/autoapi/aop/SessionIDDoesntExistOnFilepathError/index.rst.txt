@@ -1,0 +1,16 @@
+:py:mod:`aop.SessionIDDoesntExistOnFilepathError`
+=================================================
+
+.. py:module:: aop.SessionIDDoesntExistOnFilepathError
+
+
+Module Contents
+---------------
+
+.. py:exception:: SessionIDDoesntExistOnFilepathError(invalid_id)
+
+   Bases: :py:obj:`Exception`
+
+   An error raised when a specified session ID could not be found on the provided filepath.
+
+

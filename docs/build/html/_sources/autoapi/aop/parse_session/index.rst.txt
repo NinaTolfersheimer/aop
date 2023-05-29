@@ -1,0 +1,66 @@
+:py:mod:`aop.parse_session`
+===========================
+
+.. py:module:: aop.parse_session
+
+.. autoapi-nested-parse::
+
+   @author: Amélie Solveigh Hohe
+
+   This file contains the parse_session function making the parsing of a session possible.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   aop.parse_session.parse_session
+
+
+
+.. py:function:: parse_session(filepath: str, session_id: str)
+
+   This function parses a session from memory to a new Session object.
+
+   Provided with the filepath to the general location where the protocol and
+   log files are stored and an observation ID, it reads in the observation
+   parameters from the session's parameter log. This information is then used
+   to create a new Session object, which is returned by the function. If it
+   has no observationID attribute, it is recreated from the function input.
+
+   Parameters
+   ----------
+   filepath : str
+       The path to the file where you expect the session directory to reside.
+       This is most likely equivalent to the path passed to the Session class
+       to create its files in, which in turn is most likely somewhere in the
+       installation directory of the implementing script.
+   session_id : str
+       The observationID of the session to be parsed.
+
+   Returns
+   -------
+   session : Session
+       The new Session object parsed from the stored observation parameters.
+       For all intents and purposes, this object is equivalent to the object
+       whose parameters were used to parse, and you can use it to continue your
+       observation session or protocol just the same. Just be careful not to
+       run the Session.start() method again, as this would overwrite the
+       existing protocol instead of continuing it!
+
+   Raises
+   ------
+   AolNotFoundError
+       If there is no .aol file using the specified filepath and session_id.
+   SessionIDDoesntExistOnFilepathError
+       If the specified session_id is not in the filepath provided.
+   NotADirectoryError
+       If the specified filepath does not constitute a directory.
+
+
