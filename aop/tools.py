@@ -203,3 +203,28 @@ class NotInterruptedError(SessionStateError):
         Constructor method of NotInterruptedError
         """
         super().__init__(event="resume session", state="not interrupted")
+
+
+class SessionNotStartedError(Exception):
+    """
+    An error raised when trying to perform a session operation before the session has been started.
+    """
+
+    def __init__(self, illegal_operation: str) -> None:
+        """
+        Constructor method of SessionNotStartedError.
+
+        :param illegal_operation: The operation requiring starting the session.
+        :type illegal_operation: ``str``
+        """
+        self.illegal_operation = illegal_operation
+
+    def __repr__(self) -> str:
+        """
+        Custom error message.
+
+        :return: custom error message
+        :rtype: ``str``
+        """
+        return f"Not able to {self.illegal_operation}: Session has not yet started! Please call Session.start() before " \
+               f"using this command!"
