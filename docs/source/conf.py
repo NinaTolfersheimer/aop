@@ -14,6 +14,7 @@ project = 'aop'
 copyright = '2023, Amélie Solveigh Hohe'
 author = 'Amélie Solveigh Hohe'
 release = '1.0'
+version = '1.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
