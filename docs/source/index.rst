@@ -30,6 +30,8 @@ and an extensive API reference that has you covered in any technical questions t
 arise. Also be sure to check out the search function and the index function if you're
 searching for something specific!
 
+aop has its documentation hosted on ReadTheDocs.
+
 .. toctree::
 
    :maxdepth: 2
