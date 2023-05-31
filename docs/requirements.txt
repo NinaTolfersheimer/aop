@@ -1,2 +1,2 @@
-furo==2021.11.16
-sphinx-autoapi==2.1.0
+furo
+sphinx-autoapi
