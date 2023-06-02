@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 
-Welcome to aop's documentation!
+Welcome to the aop package's documentation!
 ===============================
 **aop** is a Python package that implements the
 `aop standard v1.0 <https://tolfersheim.ddns.net/index.php/s/GabziFRsMD7FLeY>`_ for
@@ -15,8 +15,8 @@ amateur astronomical observation logs.
    This project is under active development.
 
 Are you an amateur astronomer or astrophotographer who has some ambitions to document
-their observations in a clean, meaningfull way? Maybe you are currently working on a
-small, home-made research project or maybe you are just struggeling to remember the
+their observations in a clean, meaningful way? Maybe you are currently working on a
+small, home-made research project or maybe you are just struggling to remember the
 order of all the calibration frames you took last night. Either way, the aop standard
 is for you! It provides a clear and straightforward standard for the logging of amateur
 observations of the night sky. aop is the Python package that implements this standard.
@@ -40,6 +40,6 @@ aop has its documentation hosted on ReadTheDocs.
    :caption: Contents:
    installation
    examples
-   Tutorial
+      Tutorial
    genindex
 
