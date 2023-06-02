@@ -22,7 +22,7 @@ This is a module, so it does not include any way to actually *use* the possibili
 Nina Tolfersheimer Industries is currently working on the development of *Gala*, the Graphical Astronomy Logging Application, to fill this gap and to implement the aop module properly.
 
 ## How to use
-*Note: This is just a simple overview. Check out the [proper documentation](https://ninatolfersheimer.github.io/aop) for technical details.*
+*Note: This is just a simple overview. Check out the [proper documentation](https://aop-package.readthedocs.io) for technical details.*
 
 The main feature of aop is the `Session` class. This class represents an amateur astronomical observation session. When initializing a `Session` object, you can provide a variety of parameters describing the session details further, e.g. the observer, geographical position, etc. All observation related actions you might take throughout the session are represented by `Session` methods.
 
