@@ -3,11 +3,13 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+
 Welcome to aop's documentation!
 ===============================
 **aop** is a Python package that implements the
 `aop standard v1.0 <https://tolfersheim.ddns.net/index.php/s/GabziFRsMD7FLeY>`_ for
 amateur astronomical observation logs.
+
 
 .. note::
    This project is under active development.
