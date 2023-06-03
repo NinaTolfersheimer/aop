@@ -40,6 +40,6 @@ aop has its documentation hosted on ReadTheDocs.
    :caption: Contents:
    installation
    examples
-      Tutorial
+   Tutorial
    genindex
 
