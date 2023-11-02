@@ -1017,6 +1017,53 @@ class Session:
             # finally, write humidity measurement to protocol
             self.__write_to_aop(self, "CMES", f"Air Humidity: {self.humidity}%", time)
 
+    def report_variable_star_observation(self, star_id: str, chart_id: str, magnitude: float, comparison_star_1: str, comparison_star_2: str = None,
+                                         codes: list = None, time: str = "current") -> None:
+        """
+        This method reports a (visual) observation of a variable star.
+
+        It writes the op code "VSOB" and logs several important parameters.
+        This method is constructed with reporting your observation to the
+        American Association of Variable Star Observers (AAVSO) in mind.
+        Please note, however, that it DOES NOT write an AAVSO Visual File
+        Format compliant report.
+
+        :param star_id: An unambiguous identifier of the variable star being observed (e.g. "del Cep").
+        :type star_id: ``str``
+        :param chart_id: The ID of the finder chart in usage. AAVSO charts usually have a box at the upper righthand corner containing this information.
+        :type chart_id: ``str``
+        :param magnitude: Your magnitude estimate, including the decimal point.
+        :type magnitude: ``float``
+        :param comparison_star_1: The label of the first comparison star being used. AAVSO charts leave out the decimal point here, please do so as well.
+        :type comparison_star_1: ``str``
+        :param comparison_star_2: The label of the second comparison star being used, if any.
+        :type comparison_star_2: ``str``, optional
+        :param codes: A list of comment codes detailing your observation. Usage of the official AAVSO one-character comment codes is recommended, but not mandated.
+        :type codes: ``list``, optional
+        :param time: An ISO 8601 conform string of the UTC datetime you want your
+            condition update to be reported at. Can also be "current", in which
+            case the current UTC datetime will be used, defaults to "current".
+        :type time: ``str``, optional
+        :return: None
+
+        :raises SessionNotStartedError: If the session has not yet been started.
+        :raises SessionStateError: If the session is not currently "running".
+        """
+
+        if codes is None:
+            codes = []
+
+        # make sure action makes sense
+        if not self.started:
+            raise SessionNotStartedError("report variable star observation")
+        if not self.state == "running":
+            raise SessionStateError(event="report variable star observation", state="not 'running'")
+
+        if comparison_star_2 is not None:
+            self.__write_to_aop(self, "VSOB", f"{star_id}@{magnitude}: compared to {comparison_star_1} and {comparison_star_2} on chart '{chart_id}'. Comment codes: {codes}", time)
+        else:
+            self.__write_to_aop(self, "VSOB", f"{star_id}@{magnitude}: compared to {comparison_star_1} on chart '{chart_id}'. Comment codes: {codes}", time)
+
 
 def parse_session(filepath: str, session_id: str) -> Session:
     """
