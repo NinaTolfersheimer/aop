@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name="aop",
-      version="1.0",
+      version="1.1",
       description="A package that implements the aop standard v1.0 for amateur astronomical observation logs",
       download_url="https://github.com/NinaTolfersheimer/aop",
       url="https://ninatolfersheimer.github.io/aop",
