@@ -1748,8 +1748,9 @@ def parse_session(filepath: str, session_id: str) -> Session:
     :rtype: Session
     """
 
+    # v1.0 START
     # provided a filepath and the session_id, we can read the session parameters
-    if path.isdir(filepath):
+    """if path.isdir(filepath):
         if path.isdir(f"{filepath}/{session_id}"):
             try:
                 with open(f"{filepath}/{session_id}/{session_id}.aol", "rb") as log:
@@ -1770,14 +1771,22 @@ def parse_session(filepath: str, session_id: str) -> Session:
         else:
             raise SessionIDDoesntExistOnFilepathError(session_id)
     else:
-        raise NotADirectoryError("your 'filepath' argument is not a directory")
+        raise NotADirectoryError("your 'filepath' argument is not a directory")"""
+    # v1.0 END
 
-
-if __name__ == "__main__":
-    x = Session(r"C:\Users\Amélie\Documents\Astronomical Observation Protocol Program\aop_test", observer="Amélie Solveigh Hohe", latitude=48.7871982, longitude=8.7871298)
-    x.start()
-    x.issue("major", "bird shit on the lens")
-    x.condition_report("nice conditions", 23, 1023.9, 89)
-    x.condition_report(pressure=1023.6)
-    x.report_variable_star_observation("del Cep", "10star", 3.2, "32", "34", ["B"])
-    x.end()
+    # v2.0 START
+    if path.isdir(filepath):
+        if path.isdir(f"{filepath}/{session_id}"):
+            try:
+                tree = ET.parse(f"{filepath}/{session_id}/{session_id}.aop")
+                root = tree.getroot()
+                # parameters = root.find("parameters")
+                session = Session(filepath)
+                return session
+            except FileNotFoundError:
+                raise AolNotFoundError(session_id)
+        else:
+            raise SessionIDDoesntExistOnFilepathError(session_id)
+    else:
+        raise NotADirectoryError("Your 'filepath' argument is not a directory.")
+    # v2.0 END
