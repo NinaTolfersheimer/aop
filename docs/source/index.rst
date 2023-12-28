@@ -6,8 +6,7 @@
 
 Welcome to the aop package's documentation!
 ===============================
-**aop** is a Python package that implements the
-`aop standard v1.0 <https://tolfersheim.ddns.net/index.php/s/GabziFRsMD7FLeY>`_ for
+**aop** is a Python package for
 amateur astronomical observation logs.
 
 
@@ -17,12 +16,11 @@ amateur astronomical observation logs.
 Are you an amateur astronomer or astrophotographer who has some ambitions to document
 their observations in a clean, meaningful way? Maybe you are currently working on a
 small, home-made research project or maybe you are just struggling to remember the
-order of all the calibration frames you took last night. Either way, the aop standard
-is for you! It provides a clear and straightforward standard for the logging of amateur
-observations of the night sky. aop is the Python package that implements this standard.
-It only provides the means to do so, however, as it is meant to be implemented by a
-front-end application. Theoretically, you could use any app that is capable of
-implementing this package. We recommend the use of Amélie Hohe's
+order of all the calibration frames you took last night. Either way, the aop package
+is for you! It provides a clear and straightforward way for the logging of amateur
+observations of the night sky. However, it only provides the means to do so, as it is
+meant to be implemented by a front-end application. Theoretically, you could use any app
+that is capable of implementing this package. We recommend the use of Amélie Hohe's
 `Gala <https://ninatolfersheimer.github.io/gala>`_ to improve your observation logging
 quality. Focus on the hobby you enjoy, and aop and Gala will do the logging for you.
 

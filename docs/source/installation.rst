@@ -11,7 +11,9 @@ for help).
 
 After you have Python and pip installed, we can shift our attention towards aop. Always
 install it from source using pip. First download the source code from
-`GitHub <https://github.com/NinaTolfersheimer/aop>`_.
+`GitHub <https://github.com/NinaTolfersheimer/aop>`_, which will in all likelihood result in a
+.zip-archive called something along the lines of ``aop-master`` you need to unpack using your favourite
+zipping tool.
 
 The next step involves a little time spent in a command-line or terminal, so if you've
 never done anything like that, no worry, I'll walk you through. The process is dependent
@@ -74,14 +76,14 @@ To do so, simply type in the following command (without the dollar sign):
     Don't forget the extra dot after ``requirements.txt``! While it seems minor, it is
     actually one of the most important parts of this command. As we mentioned earlier,
     a single dot like this refers to the current directory, so
-    ``/home/Amelie/Downloads/aop`` in our case. This tells pip to interpret whatever it
+    ``/home/amelie/Downloads/aop`` in our case. This tells pip to interpret whatever it
     encounters in the current directory as the package we want to install. Without the
     dot it would be completely clueless!
 
 You should see a bunch of lines thrown at you by pip, but as long as the last line says
-something like ``Successfully installed aop-1.0``, you're golden.
+something like ``Successfully installed aop-2.0``, you're golden.
 
-Congretulations! You've now successfully installed the ``aop`` Python package to your
+Congratulations! You've now successfully installed the ``aop`` Python package to your
 computer. You can verify that it worked by trying to import it to a Python file.
 The most convenient way is to enter Python interactive mode by typing ``python3`` into
 your terminal prompt. You should now be seeing something like this '>>>' replacing
@@ -101,11 +103,12 @@ only the commands we use slightly differ. That's why I'm not going to describe t
 installation process in great detail here again.
 
 The terminal in Windows is called command line and is somewhat hidden, unfortunately.
-If you do not know already how to find it, enter the start menu and search for
-``cmd.exe``. Open that application and you are in the Windows command line.
+If you do not know already how to find it, enter the start menu (the little Windows icon to
+the left of your task bar) and search for ``cmd.exe``. Open that application and you are in
+the Windows command line.
 
 Similarly to Linux, the command prompt will likely start in your home directory. We will
-again assume that you have downloaded the aop package source code from GitHub and stored
+again assume that you have downloaded the aop package source code from GitHub and extracted
 it to ``C:\Users\Amelie\Downloads\``. The command prompt starts like this:
 
 .. code-block:: powershell
