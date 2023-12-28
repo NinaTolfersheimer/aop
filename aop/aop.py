@@ -106,7 +106,7 @@ def create_entry_id(time: str = "current", digits: int = 30) -> str:
             - mm     is the specified UTC month,
             - ss     is the specified UTC second,
             - ffffff is the specified fraction of a UTC second and
-            - u      represents 'digits' of unique identifier characters.
+            - u      represents the specified amount of unique identifier characters.
     :rtype: ``str``
     """
 
@@ -136,14 +136,13 @@ class Session:
 
     The Session class provides several public methods representing different
     actions and events that occur throughout an astronomical observation.
-    It is logged according to the Astronomical Observation Protocol Standard v1.0.
     """
 
     def __init__(self, filepath: str, **kwargs) -> None:
         r"""
         Constructor method for the :class:`Session` class.
 
-        :param filepath:The path where the implementing script wants aop to store its
+        :param filepath: The path where the implementing script wants aop to store its
             files. This could be a part of the implementing script's
             installation directory, for example.
         :type filepath: ``str``
@@ -182,17 +181,18 @@ class Session:
                 * *digitized* (``bool``) --
                     Whether this is the digitization of a handwritten protocol.
                 * *objective* (``str``) --
-                    Why this observation was conducted, it's objective.
+                    Why this observation was conducted.
                 * *digitizer* (``str``) --
                     The name of the person who digitized the protocol.
 
-        :raises TypeError: If the ``longitude`` argument is not of type float.
-        :raises TypeError: If the ``latitude`` argument is not of type float.
-        :raises TypeError: If the ``listOfGear`` argument is not of type list.
-        :raises TypeError: If the ``digitized`` argument is not of type bool.
+        :raises ValueError: If the ``latitude`` argument is not convertible to ``float``.
+        :raises ValueError: If the ``longitude`` argument is not convertible to ``float``.
+        :raises TypeError: If the ``listOfGear`` argument is not of type ``list``.
+        :raises TypeError: If the ``digitized`` argument is not of type ``bool``.
         :raises NotADirectoryError: If the ``filepath`` specified does not constitute a directory.
         """
 
+        # check whether the filepath is actually a directory
         if not path.isdir(filepath):
             raise NotADirectoryError("the filepath you provided is not a directory!")
 
@@ -318,7 +318,8 @@ class Session:
         else:
             self.interrupted = kwargs["interrupted"]
 
-        self.parameters = kwargs
+        # the following line is legacy only in case things should break
+        # self.parameters = kwargs
         # store every additional argument passed to the class as attribute.
         # also add self.state and self.interrupted to this parameter
         # dictionary. This seems inefficient since a Session object now effectively
@@ -326,8 +327,8 @@ class Session:
         # for a dictionary of all Session object attributes. We will not change that
         # now, however, since it works for now and could break the whole module if
         # not correctly implemented.
-        self.parameters["state"] = self.state
-        self.parameters["interrupted"] = self.interrupted
+        # self.parameters["state"] = self.state
+        # self.parameters["interrupted"] = self.interrupted
 
         self.conditionDescription = None
         """A short description of the observing conditions."""
@@ -338,12 +339,12 @@ class Session:
         self.humidity = None
         """The air humidity at the observing site in %."""
 
-        self.parameters["obsID"] = self.obsID
-        self.parameters["conditionDescription"] = self.conditionDescription
-        self.parameters["temp"] = self.temp
-        self.parameters["pressure"] = self.pressure
-        self.parameters["humidity"] = self.humidity
-        self.parameters["started"] = self.started
+        # self.parameters["obsID"] = self.obsID
+        # self.parameters["conditionDescription"] = self.conditionDescription
+        # self.parameters["temp"] = self.temp
+        # self.parameters["pressure"] = self.pressure
+        # self.parameters["humidity"] = self.humidity
+        # self.parameters["started"] = self.started
 
     def __repr__(self) -> str:
         """
@@ -385,14 +386,14 @@ class Session:
 
         # initialize session's state to "running"
         self.state = "running"
-        self.parameters["state"] = "running"
+        # self.parameters["state"] = "running"
 
         self.started = True
-        self.parameters["started"] = True
+        # self.parameters["started"] = True
 
         # generate a unique observation ID and store it as attribute
         self.obsID = generate_observation_id()
-        self.parameters["obsID"] = self.obsID
+        # self.parameters["obsID"] = self.obsID
 
         # create the directory where the session's data will be stored
         makedirs(self.filepath + "\\" + str(self.obsID), exist_ok=True)
@@ -403,18 +404,19 @@ class Session:
         if path.exists(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol"):
             raise AolFileAlreadyExistsError(self.filepath, self.obsID)
 
-        # v1.x
+        # v1.x START
         # Despite this being deprecated, the sections writing the plain-text logs are still in the code
-        # for legacy reasons and in case anything should break. The only change that has been made to
-        # the v1.x code as of v2.0 is replacing the .aop file extension with .aopl (for legacy).
+        # for legacy reasons and in case anything should break. The only changes that have been made to
+        # the v1.x code as of v2.0 is replacing the .aop file extension with .aopl (for legacy) and
+        # discontinuing the usage of self.parameters in favour of self.__dict__.
         try:
             with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aopl", "wt") as f:
                 # start each .aop file with the static observation parameters
-                for i in self.parameters:
+                for i in self.__dict__: # line used to say: 'for i in self.parameters:'
 
                     # do not print these flags, as they are subject to change
                     if i not in ["state", "interrupted"]:
-                        f.write(f"{i}: {self.parameters[i]}\n")
+                        f.write(f"{i}: {self.__dict__[i]}\n")   # line used to say: 'f.write(f"{i}: {self.parameters[i]}\n")'
 
                 # add an extra new line to indicate the main protocol beginning.
                 f.write("\n")
@@ -426,7 +428,15 @@ class Session:
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
 
-        # v2.x
+        # create or overwrite the parameter and flags log. This is a JSON file.
+        try:
+            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "w") as f:
+                f.write(json.dumps(self.__dict__, indent=4))    # line used to say: 'f.write(json.dumps(self.parameters, indent=4))'
+        except PermissionError:
+            raise PermissionError("Error when writing to .aol: You do not have the adequate access rights!")
+        # v1.x END
+
+        # v2.x START
         # create the protocol file. Regardless of the .aop file extension,
         # this should be just an ordinary .xml file.
 
@@ -437,9 +447,9 @@ class Session:
         parameters_subelement = ET.SubElement(session_root, "parameters")
 
         # populate the parameters sub-element with all the available metadata
-        for i in self.parameters:
+        for i in self.__dict__: # line used to say: 'for i in self.parameters:'
             current_parameter = ET.SubElement(parameters_subelement, i)
-            current_parameter.text = str(self.parameters[i])
+            current_parameter.text = str(self.__dict__[i])  # line used to say: 'current_parameter.text = str(self.parameters[i])'
 
         # log the session starting
         session_starts_subelement = ET.SubElement(session_root, "start")
@@ -457,13 +467,6 @@ class Session:
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
         # v2.x END
-
-        # create or overwrite the parameter and flags log. This is a JSON file.
-        try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "w") as f:
-                f.write(json.dumps(self.parameters, indent=4))
-        except PermissionError:
-            raise PermissionError("Error when writing to .aol: You do not have the adequate access rights!")
 
     @staticmethod
     def __write_to_aop(self, opcode: str, argument: str, time: str = "current") -> None:
@@ -558,7 +561,7 @@ class Session:
 
         # set interrupted flag to True
         self.interrupted = True
-        self.parameters["interrupted"] = True
+        # self.parameters["interrupted"] = True
 
         # v1.x START
         # write session event: session interrupted to protocol
@@ -642,7 +645,7 @@ class Session:
 
         # set interrupted flag to False again
         self.interrupted = False
-        self.parameters["interrupted"] = False
+        # self.parameters["interrupted"] = False
 
         # v1.x START
         # write session event: session resumed to protocol
@@ -725,7 +728,7 @@ class Session:
 
         # set state flag to "aborted"
         self.state = "aborted"
-        self.parameters["state"] = "aborted"
+        # self.parameters["state"] = "aborted"
 
         # v1.x START
         # write session event: session aborted to protocol, including the
@@ -810,7 +813,7 @@ class Session:
 
         # set state flag to "ended"
         self.state = "ended"
-        self.parameters["state"] = "ended"
+        # self.parameters["state"] = "ended"
 
         # v1.x START
         # write session event: session ended to protocol
@@ -1401,7 +1404,7 @@ class Session:
             # if a description is provided, set the conditionDescription
             # parameter
             self.conditionDescription = description
-            self.parameters["conditionDescription"] = self.conditionDescription
+            # self.parameters["conditionDescription"] = self.conditionDescription
 
             # v1.x START
             # update session parameters: conditionDescription = description
@@ -1461,7 +1464,7 @@ class Session:
         if type(temp) == float or type(temp) == int:
             # if a temperature is provided, set the temp parameter
             self.temp = temp
-            self.parameters["temp"] = self.temp
+            # self.parameters["temp"] = self.temp
 
             # v1.x START
             # update session parameters: temp = temp
@@ -1521,7 +1524,7 @@ class Session:
         if type(pressure) == int or type(pressure) == float:
             # if a pressure is provided, set the pressure parameter
             self.pressure = pressure
-            self.parameters["pressure"] = self.pressure
+            # self.parameters["pressure"] = self.pressure
 
             # v1.x START
             # update session parameters: pressure = pressure
@@ -1581,7 +1584,7 @@ class Session:
         if type(humidity) == int or type(humidity) == float:
             # if a humidity value  is provided, set the humidity parameter
             self.humidity = humidity
-            self.parameters["humidity"] = self.humidity
+            # self.parameters["humidity"] = self.humidity
 
             # v1.x START
             # update session parameters: humidity = humidity
@@ -1817,3 +1820,9 @@ def parse_session(filepath: str, session_id: str) -> Session:
     else:
         raise NotADirectoryError("Your 'filepath' argument is not a directory.")
     # v2.x END
+
+
+if __name__ == '__main__':
+    x = Session("C:/Users/Amélie/Documents/Astronomical Observation Protocol Program/aop_test")
+    x.start()
+    print(x.__dict__)
