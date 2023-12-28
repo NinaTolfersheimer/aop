@@ -14,9 +14,9 @@ from uuid import uuid4
 # from aop.tools import *
 from tools import *
 
-# v2.0
+# v2.x
 import xml.etree.ElementTree as ET
-# v2.0 END
+# v2.x END
 
 
 def current_jd(time: str = "current") -> numpy.float64:
@@ -196,12 +196,21 @@ class Session:
         if not path.isdir(filepath):
             raise NotADirectoryError("the filepath you provided is not a directory!")
 
-        self.started = False
-        """Whether the Session.start() method has already been called on this instance."""
+        # there should only ever be a 'parsing' keyword if one has been set by the parse_session function to indicate
+        # that we want to use the parameters from the old session
+        if "parsing" not in kwargs:
+            self.started = False
+            """Whether the Session.start() method has already been called on this instance."""
+        else:
+            self.started = kwargs["started"]
 
-        self.obsID = None
-        """The unique observation ID generated using the :func:`generate_observation_id()`
-        function."""
+        if "parsing" not in kwargs:
+            self.obsID = None
+            """The unique observation ID generated using the :func:`generate_observation_id()`
+            function."""
+        else:
+            self.obsID = kwargs["obsID"]
+
         self.filepath = filepath
         """The path where the implementing script wants aop to store its files. This could be a part of the implementing 
         script's installation directory, for example."""
@@ -228,7 +237,7 @@ class Session:
                 Eastern values are considered positive, Western values are considered
                 negative."""
             else:
-                raise TypeError("Please provide the 'longitude' argument in decimal degrees (as float)!")
+                self.longitude = float(kwargs["longitude"])
 
         if "latitude" in kwargs:
             if type(kwargs["latitude"]) == float:
@@ -237,7 +246,7 @@ class Session:
                 degrees. Northern values are considered positive, Southern
                 values are considered negative."""
             else:
-                raise TypeError("Please provide the 'latitude' argument in decimal degrees (as float)!")
+                self.latitude = float(kwargs["latitude"])
 
         if "transcription" in kwargs:
             self.transcription = kwargs["transcription"]
@@ -286,21 +295,28 @@ class Session:
 
         # add more keyword arguments here if necessary
 
-        self.state = None
-        """A status flag indicating the current status of the observing session.
-        The class methods set this flag to either
-            - "running",
-            - "aborted" or
-            - "ended".
-        Initialized in ``__init__()`` to None, updated in ``start()`` to "running"."""
-        # self.state stores the current state of the observation.
-        # it is only ever set by the module to either "running",
-        # "aborted" or "ended". self.state is initialized when
-        # self.start() is called.
-        self.interrupted = False
-        """A status flag indicating whether the session is currently interrupted.
-        Initialized as False."""
-        # whether the session is currently interrupted or not
+        if "parsing" not in kwargs:
+            self.state = None
+            """A status flag indicating the current status of the observing session.
+            The class methods set this flag to either
+                - "running",
+                - "aborted" or
+                - "ended".
+            Initialized in ``__init__()`` to None, updated in ``start()`` to "running"."""
+            # self.state stores the current state of the observation.
+            # it is only ever set by the module to either "running",
+            # "aborted" or "ended". self.state is initialized when
+            # self.start() is called.
+        else:
+            self.state = kwargs["state"]
+
+        if "parsing" not in kwargs:
+            self.interrupted = False
+            """A status flag indicating whether the session is currently interrupted.
+            Initialized as False."""
+            # whether the session is currently interrupted or not
+        else:
+            self.interrupted = kwargs["interrupted"]
 
         self.parameters = kwargs
         # store every additional argument passed to the class as attribute.
@@ -387,10 +403,10 @@ class Session:
         if path.exists(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol"):
             raise AolFileAlreadyExistsError(self.filepath, self.obsID)
 
-        # v1.0
-        # create the main protocol file. Regardless
-        # of the .aop file extension, this should be just an ordinary
-        # .txt file.
+        # v1.x
+        # Despite this being deprecated, the sections writing the plain-text logs are still in the code
+        # for legacy reasons and in case anything should break. The only change that has been made to
+        # the v1.x code as of v2.0 is replacing the .aop file extension with .aopl (for legacy).
         try:
             with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aopl", "wt") as f:
                 # start each .aop file with the static observation parameters
@@ -410,7 +426,7 @@ class Session:
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
 
-        # v2.0
+        # v2.x
         # create the protocol file. Regardless of the .aop file extension,
         # this should be just an ordinary .xml file.
 
@@ -440,7 +456,7 @@ class Session:
                 f.write(byte_xml)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
-        # v2.0 END
+        # v2.x END
 
         # create or overwrite the parameter and flags log. This is a JSON file.
         try:
@@ -544,12 +560,12 @@ class Session:
         self.interrupted = True
         self.parameters["interrupted"] = True
 
-        # v1.0 START
+        # v1.x START
         # write session event: session interrupted to protocol
         self.__write_to_aop(self, "SEEV", "SESSION INTERRUPTED", time=time)
-        # v1.0 END
+        # v1.x END
 
-        # v2.0 START
+        # v2.x START
         # parse element tree from .aop
         tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
 
@@ -591,7 +607,7 @@ class Session:
                 f.write(session_byte)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
-        # v2.0 END
+        # v2.x END
 
         # update session parameters: interrupted = True
         assigned_value = True
@@ -628,16 +644,16 @@ class Session:
         self.interrupted = False
         self.parameters["interrupted"] = False
 
-        # v1.0 START
+        # v1.x START
         # write session event: session resumed to protocol
         self.__write_to_aop(self, "SEEV", "SESSION RESUMED", time)
 
         # update session parameters: interrupted = False
         assigned_value = False
         self.__write_to_aol(self, "interrupted", assigned_value)
-        # v1.0 END
+        # v1.x END
 
-        # v2.0 START
+        # v2.x START
         # parse element tree from .aop
         tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
 
@@ -679,7 +695,7 @@ class Session:
                 f.write(session_byte)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
-        # v2.0 END
+        # v2.x END
 
     def abort(self, reason: str, time: str = "current") -> None:
         """
@@ -711,7 +727,7 @@ class Session:
         self.state = "aborted"
         self.parameters["state"] = "aborted"
 
-        # v1.0 START
+        # v1.x START
         # write session event: session aborted to protocol, including the
         # reason
         self.__write_to_aop(self, "SEEV", f"{reason}: SESSION {self.obsID} ABORTED", time)
@@ -719,9 +735,9 @@ class Session:
         # update session parameters: state = aborted
         assigned_value = "aborted"
         self.__write_to_aol(self, "state", assigned_value)
-        # v1.0 END
+        # v1.x END
 
-        # v2.0 START
+        # v2.x START
         # parse element tree from .aop
         tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
 
@@ -766,7 +782,7 @@ class Session:
                 f.write(session_byte)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
-        # v2.0 END
+        # v2.x END
 
     def end(self, time: str = "current") -> None:
         """
@@ -796,16 +812,16 @@ class Session:
         self.state = "ended"
         self.parameters["state"] = "ended"
 
-        # v1.0 START
+        # v1.x START
         # write session event: session ended to protocol
         self.__write_to_aop(self, "SEEV", f"SESSION {self.obsID} ENDED", time)
 
         # update session parameters: state = ended
         assigned_value = "ended"
         self.__write_to_aol(self, "state", assigned_value)
-        # v1.0 END
+        # v1.x END
 
-        # v2.0 START
+        # v2.x START
         # parse element tree from .aop
         tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
 
@@ -847,7 +863,7 @@ class Session:
                 f.write(session_byte)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
-        # v2.0 END
+        # v2.x END
 
     def comment(self, comment: str, time: str = "current") -> None:
         """
@@ -874,11 +890,11 @@ class Session:
         if not self.state == "running":
             raise SessionStateError(event="add comment", state="not 'running'")
 
-        # v1.0 START
+        # v1.x START
         self.__write_to_aop(self, "OBSC", comment, time)
-        # v1.0 END
+        # v1.x END
 
-        # v2.0 START
+        # v2.x START
         # parse element tree from .aop
         tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
 
@@ -904,7 +920,7 @@ class Session:
                 f.write(session_byte)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
-        # v2.0 END
+        # v2.x END
 
     def issue(self, severity: str, message: str, time: str = "current") -> None:
         """
@@ -951,7 +967,7 @@ class Session:
         if not self.state == "running":
             raise SessionStateError(event="report issue", state="not 'running'")
 
-        # v1.0 START
+        # v1.x START
         if severity == "potential" or severity == "p":
             self.__write_to_aop(self, "ISSU", f"Potential Issue: {message}", time)
         elif severity == "normal" or severity == "n":
@@ -962,9 +978,9 @@ class Session:
             # the above three cases are the only ones recognized by aop.
             # if users provide any other issue severity values, aop raises an error.
             raise ValueError("Invalid issue severity!")
-        # v1.0 END
+        # v1.x END
 
-        # v2.0 START
+        # v2.x START
         # make sure we're reporting a valid issue severity
         if severity not in ["potential", "p", "normal", "n", "major", "m"]:
             raise ValueError("Invalid issue severity!")
@@ -998,7 +1014,7 @@ class Session:
                     f.write(session_byte)
             except PermissionError:
                 raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
-        # v2.0 END
+        # v2.x END
 
     def point_to_name(self, targets: list, time: str = "current") -> None:
         """
@@ -1028,7 +1044,7 @@ class Session:
         if not self.state == "running":
             raise SessionStateError(event="point to name", state="not 'running'")
 
-        # v1.0 START
+        # v1.x START
         # unfortunately now you have to provide a list for targets, but this
         # way, a custom time can be set conveniently
         if not isinstance(targets, list):
@@ -1046,9 +1062,9 @@ class Session:
             tar_str += targets[i]
         # ... and writes that string to the protocol.
         self.__write_to_aop(self, "POIN", f"Pointing at target(s): {tar_str}", time)
-        # v1.0 END
+        # v1.x END
 
-        # v2.0 START
+        # v2.x START
         # ensure a list was supplied as 'targets' argument
         if not isinstance(targets, list):
             raise TypeError("Please provide the 'targets' argument as a list, even if it only has one item.")
@@ -1080,7 +1096,7 @@ class Session:
                 f.write(session_byte)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
-        # v2.0 END
+        # v2.x END
 
     def point_to_coords(self, ra: float, dec: float, time: str = "current") -> None:
         """
@@ -1130,11 +1146,11 @@ class Session:
             raise ValueError(f"Dec. value of {str(dec)} is out of range! Must be <= 90.0°.")
 
         # if the values are valid, we can write them to the protocol
-        # v1.0 START
+        # v1.x START
         self.__write_to_aop(self, "POIN", f"Pointing at coordinates: R.A.: {ra} Dec.: {dec}", time)
-        # v1.0 END
+        # v1.x END
 
-        # v2.0 START
+        # v2.x START
         # parse element tree from .aop
         tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
 
@@ -1164,7 +1180,7 @@ class Session:
                 f.write(session_byte)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
-        # v2.0 END
+        # v2.x END
 
     def take_frame(self, n: int, ftype: str, iso: int, expt: float, ap: float, time: str = "current") -> None:
         """
@@ -1286,13 +1302,13 @@ class Session:
 
         # after decoding the type of the frame, all the data is written to the
         # protocol
-        # v1.0 START
+        # v1.x START
         self.__write_to_aop(self, "FRAM",
                             f"{n} {typestr} frame(s) taken with settings: Exp.t.: {expt}s, Ap.: f/{ap}, ISO: {iso}",
                             time)
-        # v1.0 END
+        # v1.x END
 
-        # v2.0 START
+        # v2.x START
         # parse element tree from .aop
         tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
 
@@ -1331,7 +1347,7 @@ class Session:
                 f.write(session_byte)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
-        # v2.0 END
+        # v2.x END
 
     def condition_report(self, description: str = None, temp: float = None, pressure: float = None, humidity: float =
         None, time: str = "current") -> None:
@@ -1387,15 +1403,15 @@ class Session:
             self.conditionDescription = description
             self.parameters["conditionDescription"] = self.conditionDescription
 
-            # v1.0 START
+            # v1.x START
             # update session parameters: conditionDescription = description
             self.__write_to_aol(self, "conditionDescription", description)
 
             # finally, write condition description to protocol
             self.__write_to_aop(self, "CDES", description, time)
-            # v1.0 END
+            # v1.x END
 
-            # v2.0 START
+            # v2.x START
             # parse element tree from .aop
             tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
 
@@ -1440,22 +1456,22 @@ class Session:
                     f.write(session_byte)
             except PermissionError:
                 raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
-            # v2.0 END
+            # v2.x END
 
         if type(temp) == float or type(temp) == int:
             # if a temperature is provided, set the temp parameter
             self.temp = temp
             self.parameters["temp"] = self.temp
 
-            # v1.0 START
+            # v1.x START
             # update session parameters: temp = temp
             self.__write_to_aol(self, "temp", temp)
 
             # finally, write temperature measurement to protocol
             self.__write_to_aop(self, "CMES", f"Temperature: {self.temp}°C", time)
-            # v1.0 END
+            # v1.x END
 
-            # v2.0 START
+            # v2.x START
             # parse element tree from .aop
             tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
 
@@ -1500,22 +1516,22 @@ class Session:
                     f.write(session_byte)
             except PermissionError:
                 raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
-            # v2.0 END
+            # v2.x END
 
         if type(pressure) == int or type(pressure) == float:
             # if a pressure is provided, set the pressure parameter
             self.pressure = pressure
             self.parameters["pressure"] = self.pressure
 
-            # v1.0 START
+            # v1.x START
             # update session parameters: pressure = pressure
             self.__write_to_aol(self, "pressure", pressure)
 
             # finally, write pressure measurement to protocol
             self.__write_to_aop(self, "CMES", f"Air Pressure: {self.pressure} hPa", time)
-            # v1.0 END
+            # v1.x END
 
-            # v2.0 START
+            # v2.x START
             # parse element tree from .aop
             tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
 
@@ -1560,22 +1576,22 @@ class Session:
                     f.write(session_byte)
             except PermissionError:
                 raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
-            # v2.0 END
+            # v2.x END
 
         if type(humidity) == int or type(humidity) == float:
             # if a humidity value  is provided, set the humidity parameter
             self.humidity = humidity
             self.parameters["humidity"] = self.humidity
 
-            # v1.0 START
+            # v1.x START
             # update session parameters: humidity = humidity
             self.__write_to_aol(self, "humidity", humidity)
 
             # finally, write humidity measurement to protocol
             self.__write_to_aop(self, "CMES", f"Air Humidity: {self.humidity}%", time)
-            # v1.0 END
+            # v1.x END
 
-            # v2.0 START
+            # v2.x START
             # parse element tree from .aop
             tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
 
@@ -1620,7 +1636,7 @@ class Session:
                     f.write(session_byte)
             except PermissionError:
                 raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
-            # v2.0 END
+            # v2.x END
 
     def report_variable_star_observation(self, star_id: str, chart_id: str, magnitude: float, comparison_star_1: str, comparison_star_2: str = None,
                                          codes: list = None, time: str = "current") -> None:
@@ -1664,14 +1680,14 @@ class Session:
         if not self.state == "running":
             raise SessionStateError(event="report variable star observation", state="not 'running'")
 
-        # v1.0 START
+        # v1.x START
         if comparison_star_2 is not None:
             self.__write_to_aop(self, "VSOB", f"{star_id}@{magnitude}: compared to {comparison_star_1} and {comparison_star_2} on chart '{chart_id}'. Comment codes: {codes}", time)
         else:
             self.__write_to_aop(self, "VSOB", f"{star_id}@{magnitude}: compared to {comparison_star_1} on chart '{chart_id}'. Comment codes: {codes}", time)
-        # v1.0 END
+        # v1.x END
 
-        # v2.0 START
+        # v2.x START
         # parse element tree from .aop
         tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
 
@@ -1714,7 +1730,7 @@ class Session:
                 f.write(session_byte)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
-        # v2.0 END
+        # v2.x END
 
 
 def parse_session(filepath: str, session_id: str) -> Session:
@@ -1748,7 +1764,7 @@ def parse_session(filepath: str, session_id: str) -> Session:
     :rtype: Session
     """
 
-    # v1.0 START
+    # v1.x START
     # provided a filepath and the session_id, we can read the session parameters
     """if path.isdir(filepath):
         if path.isdir(f"{filepath}/{session_id}"):
@@ -1772,16 +1788,27 @@ def parse_session(filepath: str, session_id: str) -> Session:
             raise SessionIDDoesntExistOnFilepathError(session_id)
     else:
         raise NotADirectoryError("your 'filepath' argument is not a directory")"""
-    # v1.0 END
+    # v1.x END
 
-    # v2.0 START
+    # v2.x START
+    def extract_parameters(xml):
+        parameters_dict = {}
+        for element in xml:
+            if len(element) == 0:
+                parameters_dict[element.tag] = element.text
+            else:
+                parameters_dict[element.tag] = extract_parameters(element)
+        return parameters_dict
+
     if path.isdir(filepath):
         if path.isdir(f"{filepath}/{session_id}"):
             try:
                 tree = ET.parse(f"{filepath}/{session_id}/{session_id}.aop")
                 root = tree.getroot()
-                # parameters = root.find("parameters")
-                session = Session(filepath)
+                parameters_xml = root.find("parameters")
+                parameters_dict = extract_parameters(parameters_xml)
+                parameters_dict["parsing"] = True
+                session = Session(filepath, **parameters_dict)
                 return session
             except FileNotFoundError:
                 raise AolNotFoundError(session_id)
@@ -1789,4 +1816,4 @@ def parse_session(filepath: str, session_id: str) -> Session:
             raise SessionIDDoesntExistOnFilepathError(session_id)
     else:
         raise NotADirectoryError("Your 'filepath' argument is not a directory.")
-    # v2.0 END
+    # v2.x END
