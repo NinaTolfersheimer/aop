@@ -11,7 +11,12 @@ from datetime import datetime, timezone
 from os import makedirs, path
 from uuid import uuid4
 
-from aop.tools import *
+# from aop.tools import *
+from tools import *
+
+# v2.x
+import xml.etree.ElementTree as ET
+# v2.x END
 
 
 def current_jd(time: str = "current") -> numpy.float64:
@@ -101,7 +106,7 @@ def create_entry_id(time: str = "current", digits: int = 30) -> str:
             - mm     is the specified UTC month,
             - ss     is the specified UTC second,
             - ffffff is the specified fraction of a UTC second and
-            - u      represents 'digits' of unique identifier characters.
+            - u      represents the specified amount of unique identifier characters.
     :rtype: ``str``
     """
 
@@ -131,14 +136,13 @@ class Session:
 
     The Session class provides several public methods representing different
     actions and events that occur throughout an astronomical observation.
-    It is logged according to the Astronomical Observation Protocol Standard v1.0.
     """
 
     def __init__(self, filepath: str, **kwargs) -> None:
         r"""
         Constructor method for the :class:`Session` class.
 
-        :param filepath:The path where the implementing script wants aop to store its
+        :param filepath: The path where the implementing script wants aop to store its
             files. This could be a part of the implementing script's
             installation directory, for example.
         :type filepath: ``str``
@@ -177,26 +181,36 @@ class Session:
                 * *digitized* (``bool``) --
                     Whether this is the digitization of a handwritten protocol.
                 * *objective* (``str``) --
-                    Why this observation was conducted, it's objective.
+                    Why this observation was conducted.
                 * *digitizer* (``str``) --
                     The name of the person who digitized the protocol.
 
-        :raises TypeError: If the ``longitude`` argument is not of type float.
-        :raises TypeError: If the ``latitude`` argument is not of type float.
-        :raises TypeError: If the ``listOfGear`` argument is not of type list.
-        :raises TypeError: If the ``digitized`` argument is not of type bool.
+        :raises ValueError: If the ``latitude`` argument is not convertible to ``float``.
+        :raises ValueError: If the ``longitude`` argument is not convertible to ``float``.
+        :raises TypeError: If the ``listOfGear`` argument is not of type ``list``.
+        :raises TypeError: If the ``digitized`` argument is not of type ``bool``.
         :raises NotADirectoryError: If the ``filepath`` specified does not constitute a directory.
         """
 
+        # check whether the filepath is actually a directory
         if not path.isdir(filepath):
             raise NotADirectoryError("the filepath you provided is not a directory!")
 
-        self.started = False
-        """Whether the Session.start() method has already been called on this instance."""
+        # there should only ever be a 'parsing' keyword if one has been set by the parse_session function to indicate
+        # that we want to use the parameters from the old session
+        if "parsing" not in kwargs:
+            self.started = False
+            """Whether the Session.start() method has already been called on this instance."""
+        else:
+            self.started = kwargs["started"]
 
-        self.obsID = None
-        """The unique observation ID generated using the :func:`generate_observation_id()`
-        function."""
+        if "parsing" not in kwargs:
+            self.obsID = None
+            """The unique observation ID generated using the :func:`generate_observation_id()`
+            function."""
+        else:
+            self.obsID = kwargs["obsID"]
+
         self.filepath = filepath
         """The path where the implementing script wants aop to store its files. This could be a part of the implementing 
         script's installation directory, for example."""
@@ -223,7 +237,7 @@ class Session:
                 Eastern values are considered positive, Western values are considered
                 negative."""
             else:
-                raise TypeError("Please provide the 'longitude' argument in decimal degrees (as float)!")
+                self.longitude = float(kwargs["longitude"])
 
         if "latitude" in kwargs:
             if type(kwargs["latitude"]) == float:
@@ -232,7 +246,7 @@ class Session:
                 degrees. Northern values are considered positive, Southern
                 values are considered negative."""
             else:
-                raise TypeError("Please provide the 'latitude' argument in decimal degrees (as float)!")
+                self.latitude = float(kwargs["latitude"])
 
         if "transcription" in kwargs:
             self.transcription = kwargs["transcription"]
@@ -281,23 +295,31 @@ class Session:
 
         # add more keyword arguments here if necessary
 
-        self.state = None
-        """A status flag indicating the current status of the observing session.
-        The class methods set this flag to either
-            - "running",
-            - "aborted" or
-            - "ended".
-        Initialized in ``__init__()`` to None, updated in ``start()`` to "running"."""
-        # self.state stores the current state of the observation.
-        # it is only ever set by the module to either "running",
-        # "aborted" or "ended". self.state is initialized when
-        # self.start() is called.
-        self.interrupted = False
-        """A status flag indicating whether the session is currently interrupted.
-        Initialized as False."""
-        # whether the session is currently interrupted or not
+        if "parsing" not in kwargs:
+            self.state = None
+            """A status flag indicating the current status of the observing session.
+            The class methods set this flag to either
+                - "running",
+                - "aborted" or
+                - "ended".
+            Initialized in ``__init__()`` to None, updated in ``start()`` to "running"."""
+            # self.state stores the current state of the observation.
+            # it is only ever set by the module to either "running",
+            # "aborted" or "ended". self.state is initialized when
+            # self.start() is called.
+        else:
+            self.state = kwargs["state"]
 
-        self.parameters = kwargs
+        if "parsing" not in kwargs:
+            self.interrupted = False
+            """A status flag indicating whether the session is currently interrupted.
+            Initialized as False."""
+            # whether the session is currently interrupted or not
+        else:
+            self.interrupted = kwargs["interrupted"]
+
+        # the following line is legacy only in case things should break
+        # self.parameters = kwargs
         # store every additional argument passed to the class as attribute.
         # also add self.state and self.interrupted to this parameter
         # dictionary. This seems inefficient since a Session object now effectively
@@ -305,8 +327,8 @@ class Session:
         # for a dictionary of all Session object attributes. We will not change that
         # now, however, since it works for now and could break the whole module if
         # not correctly implemented.
-        self.parameters["state"] = self.state
-        self.parameters["interrupted"] = self.interrupted
+        # self.parameters["state"] = self.state
+        # self.parameters["interrupted"] = self.interrupted
 
         self.conditionDescription = None
         """A short description of the observing conditions."""
@@ -317,12 +339,12 @@ class Session:
         self.humidity = None
         """The air humidity at the observing site in %."""
 
-        self.parameters["obsID"] = self.obsID
-        self.parameters["conditionDescription"] = self.conditionDescription
-        self.parameters["temp"] = self.temp
-        self.parameters["pressure"] = self.pressure
-        self.parameters["humidity"] = self.humidity
-        self.parameters["started"] = self.started
+        # self.parameters["obsID"] = self.obsID
+        # self.parameters["conditionDescription"] = self.conditionDescription
+        # self.parameters["temp"] = self.temp
+        # self.parameters["pressure"] = self.pressure
+        # self.parameters["humidity"] = self.humidity
+        # self.parameters["started"] = self.started
 
     def __repr__(self) -> str:
         """
@@ -364,14 +386,14 @@ class Session:
 
         # initialize session's state to "running"
         self.state = "running"
-        self.parameters["state"] = "running"
+        # self.parameters["state"] = "running"
 
         self.started = True
-        self.parameters["started"] = True
+        # self.parameters["started"] = True
 
         # generate a unique observation ID and store it as attribute
         self.obsID = generate_observation_id()
-        self.parameters["obsID"] = self.obsID
+        # self.parameters["obsID"] = self.obsID
 
         # create the directory where the session's data will be stored
         makedirs(self.filepath + "\\" + str(self.obsID), exist_ok=True)
@@ -382,17 +404,19 @@ class Session:
         if path.exists(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol"):
             raise AolFileAlreadyExistsError(self.filepath, self.obsID)
 
-        # create the main protocol file. Regardless
-        # of the .aop file extension, this should be just an ordinary
-        # .txt file.
+        # v1.x START
+        # Despite this being deprecated, the sections writing the plain-text logs are still in the code
+        # for legacy reasons and in case anything should break. The only changes that have been made to
+        # the v1.x code as of v2.0 is replacing the .aop file extension with .aopl (for legacy) and
+        # discontinuing the usage of self.parameters in favour of self.__dict__.
         try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wt") as f:
+            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aopl", "wt") as f:
                 # start each .aop file with the static observation parameters
-                for i in self.parameters:
+                for i in self.__dict__: # line used to say: 'for i in self.parameters:'
 
                     # do not print these flags, as they are subject to change
                     if i not in ["state", "interrupted"]:
-                        f.write(f"{i}: {self.parameters[i]}\n")
+                        f.write(f"{i}: {self.__dict__[i]}\n")   # line used to say: 'f.write(f"{i}: {self.parameters[i]}\n")'
 
                 # add an extra new line to indicate the main protocol beginning.
                 f.write("\n")
@@ -407,9 +431,42 @@ class Session:
         # create or overwrite the parameter and flags log. This is a JSON file.
         try:
             with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "w") as f:
-                f.write(json.dumps(self.parameters, indent=4))
+                f.write(json.dumps(self.__dict__, indent=4))    # line used to say: 'f.write(json.dumps(self.parameters, indent=4))'
         except PermissionError:
             raise PermissionError("Error when writing to .aol: You do not have the adequate access rights!")
+        # v1.x END
+
+        # v2.x START
+        # create the protocol file. Regardless of the .aop file extension,
+        # this should be just an ordinary .xml file.
+
+        # this is the root element of the xml file
+        session_root = ET.Element("session")
+
+        # this will be where all the session parameters and metadata lives
+        parameters_subelement = ET.SubElement(session_root, "parameters")
+
+        # populate the parameters sub-element with all the available metadata
+        for i in self.__dict__: # line used to say: 'for i in self.parameters:'
+            current_parameter = ET.SubElement(parameters_subelement, i)
+            current_parameter.text = str(self.__dict__[i])  # line used to say: 'current_parameter.text = str(self.parameters[i])'
+
+        # log the session starting
+        session_starts_subelement = ET.SubElement(session_root, "start")
+        # record entry id and julian date as attributes
+        session_starts_subelement.set("time", str(current_jd(time)))
+        session_starts_subelement.set("id", str(create_entry_id()))
+
+        # convert xml to byte object
+        byte_xml = ET.tostring(session_root, encoding="UTF-8")
+
+        try:
+            # write byte object to file
+            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                f.write(byte_xml)
+        except PermissionError:
+            raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
+        # v2.x END
 
     @staticmethod
     def __write_to_aop(self, opcode: str, argument: str, time: str = "current") -> None:
@@ -435,7 +492,7 @@ class Session:
         """
 
         try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "at") as f:
+            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aopl", "at") as f:
                 f.write(f"({create_entry_id(time)}) {current_jd(time):.10f} -> {opcode} "
                         f"{argument}\n")
         except PermissionError:
@@ -504,10 +561,56 @@ class Session:
 
         # set interrupted flag to True
         self.interrupted = True
-        self.parameters["interrupted"] = True
+        # self.parameters["interrupted"] = True
 
+        # v1.x START
         # write session event: session interrupted to protocol
         self.__write_to_aop(self, "SEEV", "SESSION INTERRUPTED", time=time)
+        # v1.x END
+
+        # v2.x START
+        # parse element tree from .aop
+        tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+
+        # get root tag (session)
+        session_root = tree.getroot()
+
+        # create a new "interrupt" sub-element of root
+        interrupt_element = ET.SubElement(session_root, "interrupt")
+
+        # add time and entry ID as items of the interrupt tag
+        interrupt_element.set("time", str(current_jd(time)))
+        interrupt_element.set("id", str(create_entry_id()))
+
+        # since session parameters have changed (interrupted is now True), we need to replace the
+        # parameters tag as well
+
+        # firstly remove the old tag...
+        for parameter_tag in session_root.findall("parameters"):
+            session_root.remove(parameter_tag)
+
+        # ...then re-create it with the updated parameters
+        parameters_tag = ET.SubElement(session_root, "parameters")
+
+        # populate the parameters sub-element with all the available metadata
+        for i in self.__dict__:
+            # the self.parameters attribute is legacy only and should be treated as such when updating the code
+            if i != "parameters":
+                current_parameter = ET.SubElement(parameters_tag, i)
+                current_parameter.text = str(self.__dict__[i])
+
+        # finally, we overwrite the .aop with the updated element tree
+
+        # converting xml to a byte object...
+        session_byte = ET.tostring(session_root, encoding="UTF-8")
+
+        # ...then trying to write the file to memory, if we have permission to do so
+        try:
+            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                f.write(session_byte)
+        except PermissionError:
+            raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
+        # v2.x END
 
         # update session parameters: interrupted = True
         assigned_value = True
@@ -542,14 +645,60 @@ class Session:
 
         # set interrupted flag to False again
         self.interrupted = False
-        self.parameters["interrupted"] = False
+        # self.parameters["interrupted"] = False
 
+        # v1.x START
         # write session event: session resumed to protocol
         self.__write_to_aop(self, "SEEV", "SESSION RESUMED", time)
 
         # update session parameters: interrupted = False
         assigned_value = False
         self.__write_to_aol(self, "interrupted", assigned_value)
+        # v1.x END
+
+        # v2.x START
+        # parse element tree from .aop
+        tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+
+        # get root tag (session)
+        session_root = tree.getroot()
+
+        # create a new "resume" sub-element of root
+        resume_element = ET.SubElement(session_root, "resume")
+
+        # add time and entry ID as items of the resume tag
+        resume_element.set("time", str(current_jd(time)))
+        resume_element.set("id", str(create_entry_id()))
+
+        # since session parameters have changed (interrupted is now False again), we need to replace the
+        # parameters tag as well
+
+        # firstly remove the old tag...
+        for parameter_tag in session_root.findall("parameters"):
+            session_root.remove(parameter_tag)
+
+        # ...then re-create it with the updated parameters
+        parameters_tag = ET.SubElement(session_root, "parameters")
+
+        # populate the parameters sub-element with all the available metadata
+        for i in self.__dict__:
+            # the self.parameters attribute is legacy only and should be treated as such when updating the code
+            if i != "parameters":
+                current_parameter = ET.SubElement(parameters_tag, i)
+                current_parameter.text = str(self.__dict__[i])
+
+        # finally, we overwrite the .aop with the updated element tree
+
+        # converting xml to a byte object...
+        session_byte = ET.tostring(session_root, encoding="UTF-8")
+
+        # ...then trying to write the file to memory, if we have permission to do so
+        try:
+            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                f.write(session_byte)
+        except PermissionError:
+            raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
+        # v2.x END
 
     def abort(self, reason: str, time: str = "current") -> None:
         """
@@ -579,8 +728,9 @@ class Session:
 
         # set state flag to "aborted"
         self.state = "aborted"
-        self.parameters["state"] = "aborted"
+        # self.parameters["state"] = "aborted"
 
+        # v1.x START
         # write session event: session aborted to protocol, including the
         # reason
         self.__write_to_aop(self, "SEEV", f"{reason}: SESSION {self.obsID} ABORTED", time)
@@ -588,6 +738,54 @@ class Session:
         # update session parameters: state = aborted
         assigned_value = "aborted"
         self.__write_to_aol(self, "state", assigned_value)
+        # v1.x END
+
+        # v2.x START
+        # parse element tree from .aop
+        tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+
+        # get root tag (session)
+        session_root = tree.getroot()
+
+        # create a new "abort" sub-element of root
+        abort_element = ET.SubElement(session_root, "abort")
+
+        # add time and entry ID as items of the abort tag
+        abort_element.set("time", str(current_jd(time)))
+        abort_element.set("id", str(create_entry_id()))
+
+        # add the reason for aborting as text of the "abort" tag
+        abort_element.text = str(reason)
+
+        # since session parameters have changed (state is now aborted), we need to replace the
+        # parameters tag as well
+
+        # firstly remove the old tag...
+        for parameter_tag in session_root.findall("parameters"):
+            session_root.remove(parameter_tag)
+
+        # ...then re-create it with the updated parameters
+        parameters_tag = ET.SubElement(session_root, "parameters")
+
+        # populate the parameters sub-element with all the available metadata
+        for i in self.__dict__:
+            # the self.parameters attribute is legacy only and should be treated as such when updating the code
+            if i != "parameters":
+                current_parameter = ET.SubElement(parameters_tag, i)
+                current_parameter.text = str(self.__dict__[i])
+
+        # finally, we overwrite the .aop with the updated element tree
+
+        # converting xml to a byte object...
+        session_byte = ET.tostring(session_root, encoding="UTF-8")
+
+        # ...then trying to write the file to memory, if we have permission to do so
+        try:
+            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                f.write(session_byte)
+        except PermissionError:
+            raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
+        # v2.x END
 
     def end(self, time: str = "current") -> None:
         """
@@ -615,14 +813,60 @@ class Session:
 
         # set state flag to "ended"
         self.state = "ended"
-        self.parameters["state"] = "ended"
+        # self.parameters["state"] = "ended"
 
+        # v1.x START
         # write session event: session ended to protocol
         self.__write_to_aop(self, "SEEV", f"SESSION {self.obsID} ENDED", time)
 
         # update session parameters: state = ended
         assigned_value = "ended"
         self.__write_to_aol(self, "state", assigned_value)
+        # v1.x END
+
+        # v2.x START
+        # parse element tree from .aop
+        tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+
+        # get root tag (session)
+        session_root = tree.getroot()
+
+        # create a new "end" sub-element of root
+        end_element = ET.SubElement(session_root, "end")
+
+        # add time and entry ID as items of the end tag
+        end_element.set("time", str(current_jd(time)))
+        end_element.set("id", str(create_entry_id()))
+
+        # since session parameters have changed (state is now ended), we need to replace the
+        # parameters tag as well
+
+        # firstly remove the old tag...
+        for parameter_tag in session_root.findall("parameters"):
+            session_root.remove(parameter_tag)
+
+        # ...then re-create it with the updated parameters
+        parameters_tag = ET.SubElement(session_root, "parameters")
+
+        # populate the parameters sub-element with all the available metadata
+        for i in self.__dict__:
+            # the self.parameters attribute is legacy only and should be treated as such when updating the code
+            if i != "parameters":
+                current_parameter = ET.SubElement(parameters_tag, i)
+                current_parameter.text = str(self.__dict__[i])
+
+        # finally, we overwrite the .aop with the updated element tree
+
+        # converting xml to a byte object...
+        session_byte = ET.tostring(session_root, encoding="UTF-8")
+
+        # ...then trying to write the file to memory, if we have permission to do so
+        try:
+            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                f.write(session_byte)
+        except PermissionError:
+            raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
+        # v2.x END
 
     def comment(self, comment: str, time: str = "current") -> None:
         """
@@ -649,7 +893,37 @@ class Session:
         if not self.state == "running":
             raise SessionStateError(event="add comment", state="not 'running'")
 
+        # v1.x START
         self.__write_to_aop(self, "OBSC", comment, time)
+        # v1.x END
+
+        # v2.x START
+        # parse element tree from .aop
+        tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+
+        # get root tag (session)
+        session_root = tree.getroot()
+
+        # create a new "comment" sub-element of root
+        comment_element = ET.SubElement(session_root, "comment")
+
+        # add time and entry ID as items of the comment tag
+        comment_element.set("time", str(current_jd(time)))
+        comment_element.set("id", str(create_entry_id()))
+
+        # add the actual comment as text to the comment tag
+        comment_element.text = str(comment)
+
+        # converting xml to a byte object...
+        session_byte = ET.tostring(session_root, encoding="UTF-8")
+
+        # ...then trying to write the file to memory, if we have permission to do so
+        try:
+            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                f.write(session_byte)
+        except PermissionError:
+            raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
+        # v2.x END
 
     def issue(self, severity: str, message: str, time: str = "current") -> None:
         """
@@ -696,6 +970,7 @@ class Session:
         if not self.state == "running":
             raise SessionStateError(event="report issue", state="not 'running'")
 
+        # v1.x START
         if severity == "potential" or severity == "p":
             self.__write_to_aop(self, "ISSU", f"Potential Issue: {message}", time)
         elif severity == "normal" or severity == "n":
@@ -706,6 +981,43 @@ class Session:
             # the above three cases are the only ones recognized by aop.
             # if users provide any other issue severity values, aop raises an error.
             raise ValueError("Invalid issue severity!")
+        # v1.x END
+
+        # v2.x START
+        # make sure we're reporting a valid issue severity
+        if severity not in ["potential", "p", "normal", "n", "major", "m"]:
+            raise ValueError("Invalid issue severity!")
+        else:
+            # parse element tree from .aop
+            tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+
+            # get root tag (session)
+            session_root = tree.getroot()
+
+            # create a new "issue" sub-element of root
+            issue_element = ET.SubElement(session_root, "issue")
+
+            # add time and entry ID as items of the issue tag
+            issue_element.set("time", str(current_jd(time)))
+            issue_element.set("id", str(create_entry_id()))
+
+            # add the issue severity and the issue description as sub-tags of the issue tag
+            severity_tag = ET.SubElement(issue_element, "severity")
+            severity_tag.text = severity
+
+            description_tag = ET.SubElement(issue_element, "description")
+            description_tag.text = str(message)
+
+            # converting xml to a byte object...
+            session_byte = ET.tostring(session_root, encoding="UTF-8")
+
+            # ...then trying to write the file to memory, if we have permission to do so
+            try:
+                with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                    f.write(session_byte)
+            except PermissionError:
+                raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
+        # v2.x END
 
     def point_to_name(self, targets: list, time: str = "current") -> None:
         """
@@ -735,6 +1047,7 @@ class Session:
         if not self.state == "running":
             raise SessionStateError(event="point to name", state="not 'running'")
 
+        # v1.x START
         # unfortunately now you have to provide a list for targets, but this
         # way, a custom time can be set conveniently
         if not isinstance(targets, list):
@@ -752,6 +1065,41 @@ class Session:
             tar_str += targets[i]
         # ... and writes that string to the protocol.
         self.__write_to_aop(self, "POIN", f"Pointing at target(s): {tar_str}", time)
+        # v1.x END
+
+        # v2.x START
+        # ensure a list was supplied as 'targets' argument
+        if not isinstance(targets, list):
+            raise TypeError("Please provide the 'targets' argument as a list, even if it only has one item.")
+
+        # parse element tree from .aop
+        tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+
+        # get root tag (session)
+        session_root = tree.getroot()
+
+        # create a new "point" sub-element of root
+        point_element = ET.SubElement(session_root, "point")
+
+        # add time and entry ID as items of the point tag
+        point_element.set("time", str(current_jd(time)))
+        point_element.set("id", str(create_entry_id()))
+
+        # add the contents of the targets list as sub-tags to the point tag
+        for i in targets:
+            new_target_element = ET.SubElement(point_element, "name")
+            new_target_element.text = str(i)
+
+        # converting xml to a byte object...
+        session_byte = ET.tostring(session_root, encoding="UTF-8")
+
+        # ...then trying to write the file to memory, if we have permission to do so
+        try:
+            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                f.write(session_byte)
+        except PermissionError:
+            raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
+        # v2.x END
 
     def point_to_coords(self, ra: float, dec: float, time: str = "current") -> None:
         """
@@ -800,8 +1148,42 @@ class Session:
         elif dec > 90.0:
             raise ValueError(f"Dec. value of {str(dec)} is out of range! Must be <= 90.0°.")
 
-        # if the values are value, we can write them to the protocol
+        # if the values are valid, we can write them to the protocol
+        # v1.x START
         self.__write_to_aop(self, "POIN", f"Pointing at coordinates: R.A.: {ra} Dec.: {dec}", time)
+        # v1.x END
+
+        # v2.x START
+        # parse element tree from .aop
+        tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+
+        # get root tag (session)
+        session_root = tree.getroot()
+
+        # create a new "point" sub-element of root
+        point_element = ET.SubElement(session_root, "point")
+
+        # add time and entry ID as items of the point tag
+        point_element.set("time", str(current_jd(time)))
+        point_element.set("id", str(create_entry_id()))
+
+        # add R.A. and Dec. of the target as sub-tags to the point tag respectively
+        ra_sub_tag = ET.SubElement(point_element, "ra")
+        ra_sub_tag.text = str(ra)
+
+        dec_sub_tag = ET.SubElement(point_element, "dec")
+        dec_sub_tag.text = str(dec)
+
+        # converting xml to a byte object...
+        session_byte = ET.tostring(session_root, encoding="UTF-8")
+
+        # ...then trying to write the file to memory, if we have permission to do so
+        try:
+            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                f.write(session_byte)
+        except PermissionError:
+            raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
+        # v2.x END
 
     def take_frame(self, n: int, ftype: str, iso: int, expt: float, ap: float, time: str = "current") -> None:
         """
@@ -923,12 +1305,56 @@ class Session:
 
         # after decoding the type of the frame, all the data is written to the
         # protocol
+        # v1.x START
         self.__write_to_aop(self, "FRAM",
                             f"{n} {typestr} frame(s) taken with settings: Exp.t.: {expt}s, Ap.: f/{ap}, ISO: {iso}",
                             time)
+        # v1.x END
+
+        # v2.x START
+        # parse element tree from .aop
+        tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+
+        # get root tag (session)
+        session_root = tree.getroot()
+
+        # create a new "frame" sub-element of root
+        frame_element = ET.SubElement(session_root, "frame")
+
+        # add time and entry ID as items of the frame tag
+        frame_element.set("time", str(current_jd(time)))
+        frame_element.set("id", str(create_entry_id()))
+
+        # add the camera settings as sub-tags of the frame tag, respectively
+        number_tag = ET.SubElement(frame_element, "number_of_frames")
+        number_tag.text = str(n)
+
+        ftype_tag = ET.SubElement(frame_element, "type")
+        ftype_tag.text = ftype
+
+        expt_tag = ET.SubElement(frame_element, "exposure")
+        expt_tag.text = str(expt)
+
+        iso_tag = ET.SubElement(frame_element, "iso")
+        iso_tag.text = str(iso)
+
+        ap_tag = ET.SubElement(frame_element, "aperture")
+        ap_tag.text = str(ap)
+
+        # converting xml to a byte object...
+        session_byte = ET.tostring(session_root, encoding="UTF-8")
+
+        # ...then trying to write the file to memory, if we have permission to do so
+        try:
+            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                f.write(session_byte)
+        except PermissionError:
+            raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
+        # v2.x END
 
     def condition_report(self, description: str = None, temp: float = None, pressure: float = None, humidity: float =
-    None, time: str = "current") -> None:
+        None, time: str = "current") -> None:
+
         """
         This method reports a condition description or measurement.
 
@@ -964,6 +1390,8 @@ class Session:
 
         :raises SessionNotStartedError: If the session has not yet been started.
         :raises SessionStateError: If the session is not currently "running".
+
+        :return: None
         """
 
         # make sure reporting conditions makes sense
@@ -976,46 +1404,336 @@ class Session:
             # if a description is provided, set the conditionDescription
             # parameter
             self.conditionDescription = description
-            self.parameters["conditionDescription"] = self.conditionDescription
+            # self.parameters["conditionDescription"] = self.conditionDescription
 
+            # v1.x START
             # update session parameters: conditionDescription = description
             self.__write_to_aol(self, "conditionDescription", description)
 
             # finally, write condition description to protocol
             self.__write_to_aop(self, "CDES", description, time)
+            # v1.x END
+
+            # v2.x START
+            # parse element tree from .aop
+            tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+
+            # get root tag (session)
+            session_root = tree.getroot()
+
+            # create a new "condition_description" sub-element of root
+            condition_description_element = ET.SubElement(session_root, "condition_description")
+
+            # add time and entry ID as items of the condition_description tag
+            condition_description_element.set("time", str(current_jd(time)))
+            condition_description_element.set("id", str(create_entry_id()))
+
+            # add the actual condition description as text of the condition description tag
+            condition_description_element.text = str(description)
+
+            # since session parameters have changed (conditionDescription), we need to replace the
+            # parameters tag as well
+
+            # firstly remove the old tag...
+            for parameter_tag in session_root.findall("parameters"):
+                session_root.remove(parameter_tag)
+
+            # ...then re-create it with the updated parameters
+            parameters_tag = ET.SubElement(session_root, "parameters")
+
+            # populate the parameters sub-element with all the available metadata
+            for i in self.__dict__:
+                # the self.parameters attribute is legacy only and should be treated as such when updating the code
+                if i != "parameters":
+                    current_parameter = ET.SubElement(parameters_tag, i)
+                    current_parameter.text = str(self.__dict__[i])
+
+            # finally, we overwrite the .aop with the updated element tree
+
+            # converting xml to a byte object...
+            session_byte = ET.tostring(session_root, encoding="UTF-8")
+
+            # ...then trying to write the file to memory, if we have permission to do so
+            try:
+                with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                    f.write(session_byte)
+            except PermissionError:
+                raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
+            # v2.x END
 
         if type(temp) == float or type(temp) == int:
             # if a temperature is provided, set the temp parameter
             self.temp = temp
-            self.parameters["temp"] = self.temp
+            # self.parameters["temp"] = self.temp
 
+            # v1.x START
             # update session parameters: temp = temp
             self.__write_to_aol(self, "temp", temp)
 
             # finally, write temperature measurement to protocol
             self.__write_to_aop(self, "CMES", f"Temperature: {self.temp}°C", time)
+            # v1.x END
+
+            # v2.x START
+            # parse element tree from .aop
+            tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+
+            # get root tag (session)
+            session_root = tree.getroot()
+
+            # create a new "temperature" sub-element of root
+            temperature_element = ET.SubElement(session_root, "temperature")
+
+            # add time and entry ID as items of the temperature tag
+            temperature_element.set("time", str(current_jd(time)))
+            temperature_element.set("id", str(create_entry_id()))
+
+            # add the actual temperature as text of the temperature tag
+            temperature_element.text = str(temp)
+
+            # since session parameters have changed (temp), we need to replace the
+            # parameters tag as well
+
+            # firstly remove the old tag...
+            for parameter_tag in session_root.findall("parameters"):
+                session_root.remove(parameter_tag)
+
+            # ...then re-create it with the updated parameters
+            parameters_tag = ET.SubElement(session_root, "parameters")
+
+            # populate the parameters sub-element with all the available metadata
+            for i in self.__dict__:
+                # the self.parameters attribute is legacy only and should be treated as such when updating the code
+                if i != "parameters":
+                    current_parameter = ET.SubElement(parameters_tag, i)
+                    current_parameter.text = str(self.__dict__[i])
+
+            # finally, we overwrite the .aop with the updated element tree
+
+            # converting xml to a byte object...
+            session_byte = ET.tostring(session_root, encoding="UTF-8")
+
+            # ...then trying to write the file to memory, if we have permission to do so
+            try:
+                with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                    f.write(session_byte)
+            except PermissionError:
+                raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
+            # v2.x END
 
         if type(pressure) == int or type(pressure) == float:
             # if a pressure is provided, set the pressure parameter
             self.pressure = pressure
-            self.parameters["pressure"] = self.pressure
+            # self.parameters["pressure"] = self.pressure
 
+            # v1.x START
             # update session parameters: pressure = pressure
             self.__write_to_aol(self, "pressure", pressure)
 
             # finally, write pressure measurement to protocol
             self.__write_to_aop(self, "CMES", f"Air Pressure: {self.pressure} hPa", time)
+            # v1.x END
+
+            # v2.x START
+            # parse element tree from .aop
+            tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+
+            # get root tag (session)
+            session_root = tree.getroot()
+
+            # create a new "pressure" sub-element of root
+            pressure_element = ET.SubElement(session_root, "pressure")
+
+            # add time and entry ID as items of the point tag
+            pressure_element.set("time", str(current_jd(time)))
+            pressure_element.set("id", str(create_entry_id()))
+
+            # add the actual pressure as text of the pressure tag
+            pressure_element.text = str(pressure)
+
+            # since session parameters have changed (pressure), we need to replace the
+            # parameters tag as well
+
+            # firstly remove the old tag...
+            for parameter_tag in session_root.findall("parameters"):
+                session_root.remove(parameter_tag)
+
+            # ...then re-create it with the updated parameters
+            parameters_tag = ET.SubElement(session_root, "parameters")
+
+            # populate the parameters sub-element with all the available metadata
+            for i in self.__dict__:
+                # the self.parameters attribute is legacy only and should be treated as such when updating the code
+                if i != "parameters":
+                    current_parameter = ET.SubElement(parameters_tag, i)
+                    current_parameter.text = str(self.__dict__[i])
+
+            # finally, we overwrite the .aop with the updated element tree
+
+            # converting xml to a byte object...
+            session_byte = ET.tostring(session_root, encoding="UTF-8")
+
+            # ...then trying to write the file to memory, if we have permission to do so
+            try:
+                with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                    f.write(session_byte)
+            except PermissionError:
+                raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
+            # v2.x END
 
         if type(humidity) == int or type(humidity) == float:
             # if a humidity value  is provided, set the humidity parameter
             self.humidity = humidity
-            self.parameters["humidity"] = self.humidity
+            # self.parameters["humidity"] = self.humidity
 
+            # v1.x START
             # update session parameters: humidity = humidity
             self.__write_to_aol(self, "humidity", humidity)
 
             # finally, write humidity measurement to protocol
             self.__write_to_aop(self, "CMES", f"Air Humidity: {self.humidity}%", time)
+            # v1.x END
+
+            # v2.x START
+            # parse element tree from .aop
+            tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+
+            # get root tag (session)
+            session_root = tree.getroot()
+
+            # create a new "humidity" sub-element of root
+            humidity_element = ET.SubElement(session_root, "humidity")
+
+            # add time and entry ID as items of the humidity tag
+            humidity_element.set("time", str(current_jd(time)))
+            humidity_element.set("id", str(create_entry_id()))
+
+            # add the actual humidity as text of the humidity tag
+            humidity_element.text = str(humidity)
+
+            # since session parameters have changed (humidity), we need to replace the
+            # parameters tag as well
+
+            # firstly remove the old tag...
+            for parameter_tag in session_root.findall("parameters"):
+                session_root.remove(parameter_tag)
+
+            # ...then re-create it with the updated parameters
+            parameters_tag = ET.SubElement(session_root, "parameters")
+
+            # populate the parameters sub-element with all the available metadata
+            for i in self.__dict__:
+                # the self.parameters attribute is legacy only and should be treated as such when updating the code
+                if i != "parameters":
+                    current_parameter = ET.SubElement(parameters_tag, i)
+                    current_parameter.text = str(self.__dict__[i])
+
+            # finally, we overwrite the .aop with the updated element tree
+
+            # converting xml to a byte object...
+            session_byte = ET.tostring(session_root, encoding="UTF-8")
+
+            # ...then trying to write the file to memory, if we have permission to do so
+            try:
+                with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                    f.write(session_byte)
+            except PermissionError:
+                raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
+            # v2.x END
+
+    def report_variable_star_observation(self, star_id: str, chart_id: str, magnitude: float, comparison_star_1: str, comparison_star_2: str = None,
+                                         codes: list = None, time: str = "current") -> None:
+        """
+        This method reports a (visual) observation of a variable star.
+
+        It writes the op code "VSOB" and logs several important parameters.
+        This method is constructed with reporting your observation to the
+        American Association of Variable Star Observers (AAVSO) in mind.
+        Please note, however, that it DOES NOT write an AAVSO Visual File
+        Format compliant report.
+
+        :param star_id: An unambiguous identifier of the variable star being observed (e.g. "del Cep").
+        :type star_id: ``str``
+        :param chart_id: The ID of the finder chart in usage. AAVSO charts usually have a box at the upper righthand corner containing this information.
+        :type chart_id: ``str``
+        :param magnitude: Your magnitude estimate, including the decimal point.
+        :type magnitude: ``float``
+        :param comparison_star_1: The label of the first comparison star being used. AAVSO charts leave out the decimal point here, please do so as well.
+        :type comparison_star_1: ``str``
+        :param comparison_star_2: The label of the second comparison star being used, if any.
+        :type comparison_star_2: ``str``, optional
+        :param codes: A list of comment codes detailing your observation. Usage of the official AAVSO one-character comment codes is recommended, but not mandated.
+        :type codes: ``list``, optional
+        :param time: An ISO 8601 conform string of the UTC datetime you want your
+            condition update to be reported at. Can also be "current", in which
+            case the current UTC datetime will be used, defaults to "current".
+        :type time: ``str``, optional
+        :return: None
+
+        :raises SessionNotStartedError: If the session has not yet been started.
+        :raises SessionStateError: If the session is not currently "running".
+        """
+
+        if codes is None:
+            codes = []
+
+        # make sure action makes sense
+        if not self.started:
+            raise SessionNotStartedError("report variable star observation")
+        if not self.state == "running":
+            raise SessionStateError(event="report variable star observation", state="not 'running'")
+
+        # v1.x START
+        if comparison_star_2 is not None:
+            self.__write_to_aop(self, "VSOB", f"{star_id}@{magnitude}: compared to {comparison_star_1} and {comparison_star_2} on chart '{chart_id}'. Comment codes: {codes}", time)
+        else:
+            self.__write_to_aop(self, "VSOB", f"{star_id}@{magnitude}: compared to {comparison_star_1} on chart '{chart_id}'. Comment codes: {codes}", time)
+        # v1.x END
+
+        # v2.x START
+        # parse element tree from .aop
+        tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+
+        # get root tag (session)
+        session_root = tree.getroot()
+
+        # create a new "variable_star" sub-element of root
+        variable_star_element = ET.SubElement(session_root, "variable_star_observation")
+
+        # add time and entry ID as items of the variable_star tag
+        variable_star_element.set("time", str(current_jd(time)))
+        variable_star_element.set("id", str(create_entry_id()))
+
+        # add the star-specific observation parameters as sub-tags of the variable_star tag, respectively
+        star_id_tag = ET.SubElement(variable_star_element, "star_id")
+        star_id_tag.text = str(star_id)
+
+        magnitude_tag = ET.SubElement(variable_star_element, "magnitude")
+        magnitude_tag.text = str(magnitude)
+
+        chart_id_tag = ET.SubElement(variable_star_element, "chart_id")
+        chart_id_tag.text = str(chart_id)
+
+        comparison_star_1_tag = ET.SubElement(variable_star_element, "comparison_star_1")
+        comparison_star_1_tag.text = str(comparison_star_1)
+
+        if comparison_star_2 is not None:
+            comparison_star_2_tag = ET.SubElement(variable_star_element, "comparison_star_2")
+            comparison_star_2_tag.text = str(comparison_star_2)
+
+        codes_tag = ET.SubElement(variable_star_element, "observation_codes")
+        codes_tag.text = str(codes)
+
+        # converting xml to a byte object...
+        session_byte = ET.tostring(session_root, encoding="UTF-8")
+
+        # ...then trying to write the file to memory, if we have permission to do so
+        try:
+            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                f.write(session_byte)
+        except PermissionError:
+            raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
+        # v2.x END
 
     def report_variable_star_observation(self, star_id: str, chart_id: str, magnitude: float, comparison_star_1: str, comparison_star_2: str = None,
                                          codes: list = None, time: str = "current") -> None:
@@ -1096,8 +1814,9 @@ def parse_session(filepath: str, session_id: str) -> Session:
     :rtype: Session
     """
 
+    # v1.x START
     # provided a filepath and the session_id, we can read the session parameters
-    if path.isdir(filepath):
+    """if path.isdir(filepath):
         if path.isdir(f"{filepath}/{session_id}"):
             try:
                 with open(f"{filepath}/{session_id}/{session_id}.aol", "rb") as log:
@@ -1118,4 +1837,39 @@ def parse_session(filepath: str, session_id: str) -> Session:
         else:
             raise SessionIDDoesntExistOnFilepathError(session_id)
     else:
-        raise NotADirectoryError("your 'filepath' argument is not a directory")
+        raise NotADirectoryError("your 'filepath' argument is not a directory")"""
+    # v1.x END
+
+    # v2.x START
+    def extract_parameters(xml):
+        parameters_dict = {}
+        for element in xml:
+            if len(element) == 0:
+                parameters_dict[element.tag] = element.text
+            else:
+                parameters_dict[element.tag] = extract_parameters(element)
+        return parameters_dict
+
+    if path.isdir(filepath):
+        if path.isdir(f"{filepath}/{session_id}"):
+            try:
+                tree = ET.parse(f"{filepath}/{session_id}/{session_id}.aop")
+                root = tree.getroot()
+                parameters_xml = root.find("parameters")
+                parameters_dict = extract_parameters(parameters_xml)
+                parameters_dict["parsing"] = True
+                session = Session(filepath, **parameters_dict)
+                return session
+            except FileNotFoundError:
+                raise AolNotFoundError(session_id)
+        else:
+            raise SessionIDDoesntExistOnFilepathError(session_id)
+    else:
+        raise NotADirectoryError("Your 'filepath' argument is not a directory.")
+    # v2.x END
+
+
+if __name__ == '__main__':
+    x = Session("C:/Users/Amélie/Documents/Astronomical Observation Protocol Program/aop_test")
+    x.start()
+    print(x.__dict__)

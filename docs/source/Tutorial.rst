@@ -19,7 +19,7 @@ understand steps. All right, let's get going!
 
 .. note::
 
-    This tutorial works with version 1.0.
+    This tutorial works with version 2.0.
 
 Getting started
 ---------------
