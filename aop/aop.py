@@ -16,6 +16,8 @@ from tools import *
 
 # v2.x
 import xml.etree.ElementTree as ET
+
+
 # v2.x END
 
 
@@ -90,7 +92,7 @@ def create_entry_id(time: str = "current", digits: int = 30) -> str:
         time, if the time of the entry is not the current time this method is
         called, defaults to "current".
     :type time: ``str``, optional
-    :param digits: The number of digits to use for the unique part of the entry ID, defaults to 30.
+    :param digits: The number of characters to use for the unique part of the entry ID, defaults to 30.
     :type digits: ``int``, optional
 
     :raises TypeError: If time is not a string.
@@ -99,14 +101,14 @@ def create_entry_id(time: str = "current", digits: int = 30) -> str:
 
     :return: The entry ID generated. It follows the syntax YYYYMMDDhhmmssffffff-u,
         where:
-            - YYYY   is the specified UTC year,
-            - MM     is the specified UTC month,
-            - DD     is the specified UTC day,
-            - hh     is the specified UTC hour,
-            - mm     is the specified UTC month,
-            - ss     is the specified UTC second,
-            - ffffff is the specified fraction of a UTC second and
-            - u      represents the specified amount of unique identifier characters.
+            * YYYY   is the specified UTC year,
+            * MM     is the specified UTC month,
+            * DD     is the specified UTC day,
+            * hh     is the specified UTC hour,
+            * mm     is the specified UTC month,
+            * ss     is the specified UTC second,
+            * ffffff is the specified fraction of a UTC second and
+            * u      represents the specified amount of unique identifier characters.
     :rtype: ``str``
     """
 
@@ -143,15 +145,14 @@ class Session:
         Constructor method for the :class:`Session` class.
 
         :param filepath: The path where the implementing script wants aop to store its
-            files. This could be a part of the implementing script's
-            installation directory, for example.
+            files.
         :type filepath: ``str``
         :param \**kwargs: Any keyword arguments. See below.
         :Keyword Arguments:
                 * *name* (``str``) --
                     Observation title. This is not used internally, as aop
                     relies solely on obsID. However, this is logged to
-                    observation parameters for readability and organizing.
+                    observation parameters for organizing purposes.
                 * *observer* (``str``) --
                     The name of the person conducting the observation.
                 * *locationDescription* (``str``) --
@@ -219,79 +220,56 @@ class Session:
         # as attributes
         if "name" in kwargs:
             self.name = kwargs["name"]
-            """Observation title. This is not used internally, as aop relies solely on obsID. However, this is logged
-            to observation parameters for readability and organizing."""
 
         if "observer" in kwargs:
             self.observer = kwargs["observer"]
-            """The name of the person conducting the observation."""
 
         if "locationDescription" in kwargs:
             self.locationDescription = kwargs["locationDescription"]
-            """A short description of the location, e.g. **12 Example Road**"""
 
         if "longitude" in kwargs:
             if type(kwargs["longitude"]) == float:
                 self.longitude = kwargs["longitude"]
-                """The location's geographical longitude, expressed in decimal degrees.
-                Eastern values are considered positive, Western values are considered
-                negative."""
             else:
                 self.longitude = float(kwargs["longitude"])
 
         if "latitude" in kwargs:
             if type(kwargs["latitude"]) == float:
                 self.latitude = kwargs["latitude"]
-                """The location's geographical latitude, expressed in decimal
-                degrees. Northern values are considered positive, Southern
-                values are considered negative."""
             else:
                 self.latitude = float(kwargs["latitude"])
 
         if "transcription" in kwargs:
             self.transcription = kwargs["transcription"]
-            """The person who compiled the protocol."""
 
         if "listOfGear" in kwargs:
             if type(kwargs["listOfGear"]) == list:
                 self.listOfGear = kwargs["listOfGear"]
-                """A list of each piece of gear used for the observation. List elements
-                can be of any type."""
             else:
                 raise TypeError("Please provide a list object for the 'listOfGear' argument!")
 
         if "project" in kwargs:
             self.project = kwargs["project"]
-            """The title of the project this observation is a part of."""
 
         if "target" in kwargs:
             self.target = kwargs["target"]
-            """The object(s) that was/were observed."""
 
         if "commentary" in kwargs:
             self.commentary = kwargs["commentary"]
-            """General commentary referring to the whole session and not
-            covered by other functionality of this module. This could
-            provide further insight on the observation's purpose, for
-            example."""
 
         if "digitized" in kwargs:
             if kwargs["digitized"]:
                 self.digitized = True
-                """Whether this is the digitization of a handwritten protocol."""
             elif not kwargs["digitized"]:
                 self.digitized = False
-                """Whether this is the digitization of a handwritten protocol."""
             else:
                 raise TypeError("Please provide a boolean value as 'digitized' argument!")
 
         if "objective" in kwargs:
             self.objective = kwargs["objective"]
-            """Why this observation was conducted, it's objective."""
 
         if "digitizer" in kwargs:
             self.digitizer = kwargs["digitizer"]
-            """The name of the person who digitized the protocol."""
 
         # add more keyword arguments here if necessary
 
@@ -299,14 +277,10 @@ class Session:
             self.state = None
             """A status flag indicating the current status of the observing session.
             The class methods set this flag to either
-                - "running",
-                - "aborted" or
-                - "ended".
+                * "running",
+                * "aborted" or
+                * "ended".
             Initialized in ``__init__()`` to None, updated in ``start()`` to "running"."""
-            # self.state stores the current state of the observation.
-            # it is only ever set by the module to either "running",
-            # "aborted" or "ended". self.state is initialized when
-            # self.start() is called.
         else:
             self.state = kwargs["state"]
 
@@ -314,21 +288,24 @@ class Session:
             self.interrupted = False
             """A status flag indicating whether the session is currently interrupted.
             Initialized as False."""
-            # whether the session is currently interrupted or not
         else:
             self.interrupted = kwargs["interrupted"]
 
-        # the following line is legacy only in case things should break
+        # The following code block is legacy only in case things should break
+        # and is therefore commented out.
+        # It stores every keyword argument passed to the class in a parameter dictionary and
+        # also adds all the other attributes to this dictionary. This is inefficient since
+        # a Session object now effectively holds every attribute twice.
+
         # self.parameters = kwargs
-        # store every additional argument passed to the class as attribute.
-        # also add self.state and self.interrupted to this parameter
-        # dictionary. This seems inefficient since a Session object now effectively
-        # holds every attribute twice. We could perhaps instead exchange 'parameters'
-        # for a dictionary of all Session object attributes. We will not change that
-        # now, however, since it works for now and could break the whole module if
-        # not correctly implemented.
         # self.parameters["state"] = self.state
         # self.parameters["interrupted"] = self.interrupted
+        # self.parameters["obsID"] = self.obsID
+        # self.parameters["conditionDescription"] = self.conditionDescription
+        # self.parameters["temp"] = self.temp
+        # self.parameters["pressure"] = self.pressure
+        # self.parameters["humidity"] = self.humidity
+        # self.parameters["started"] = self.started
 
         self.conditionDescription = None
         """A short description of the observing conditions."""
@@ -338,13 +315,6 @@ class Session:
         """The air pressure at the observing site in hPa."""
         self.humidity = None
         """The air humidity at the observing site in %."""
-
-        # self.parameters["obsID"] = self.obsID
-        # self.parameters["conditionDescription"] = self.conditionDescription
-        # self.parameters["temp"] = self.temp
-        # self.parameters["pressure"] = self.pressure
-        # self.parameters["humidity"] = self.humidity
-        # self.parameters["started"] = self.started
 
     def __repr__(self) -> str:
         """
@@ -367,11 +337,9 @@ class Session:
         By not starting the observation when a Session object is created, it is
         possible to prepare the Session object pre-observation as well as
         parse existing protocols from memory into a new Session object. It
-        changes the Session's "state" flag to "running" (attribute and
-        parameter), as well as generating an observation ID, setting up a
-        directory for the protocol and parameter log to live in, and writing
-        the initial files to that directory. It also writes a Session Event
-        "SEEV SESSION %obsID% STARTED" to .aop.
+        changes the Session's "state" flag to "running", as well as generating
+        an observation ID, setting up a directory for the protocol to live in, and writing
+        the initial files to that directory.
 
         :param time: An ISO 8601 conform string of the UTC datetime you want your
             observation to start. Can also be "current", in which case the current
@@ -379,9 +347,10 @@ class Session:
         :type time: ``str``, optional
 
         :raises PermissionError: If the user does not have the adequate access rights for reading from or writing to the
-            .aol or .aop file.
+            .aop file.
         :raises AopFileAlreadyExistsError: If the .aop file the method tries to create already exists.
-        :raises AolFileAlreadyExistsError: If the .aol file the method tries to create already exists.
+        :raises AopFileAlreadyExistsError: If the .aopl file the method tries to create for legacy only already exists.
+        :raises AolFileAlreadyExistsError: If the .aol file the method tries to create for legacy only already exists.
         """
 
         # initialize session's state to "running"
@@ -391,32 +360,38 @@ class Session:
         self.started = True
         # self.parameters["started"] = True
 
-        # generate a unique observation ID and store it as attribute
+        # generate a unique observation ID and update the as of now empty attribute.
         self.obsID = generate_observation_id()
         # self.parameters["obsID"] = self.obsID
 
         # create the directory where the session's data will be stored
         makedirs(self.filepath + "\\" + str(self.obsID), exist_ok=True)
 
-        # check whether the protocol files already exist
+        # check whether the protocol file already exists
         if path.exists(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop"):
             raise AopFileAlreadyExistsError(self.filepath, self.obsID)
-        if path.exists(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol"):
-            raise AolFileAlreadyExistsError(self.filepath, self.obsID)
 
         # v1.x START
         # Despite this being deprecated, the sections writing the plain-text logs are still in the code
         # for legacy reasons and in case anything should break. The only changes that have been made to
         # the v1.x code as of v2.0 is replacing the .aop file extension with .aopl (for legacy) and
         # discontinuing the usage of self.parameters in favour of self.__dict__.
+
+        # check whether the legacy protocol files already exist
+        if path.exists(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aopl"):
+            raise AopFileAlreadyExistsError(self.filepath, self.obsID)
+        if path.exists(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol"):
+            raise AolFileAlreadyExistsError(self.filepath, self.obsID)
+
         try:
             with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aopl", "wt") as f:
                 # start each .aop file with the static observation parameters
-                for i in self.__dict__: # line used to say: 'for i in self.parameters:'
+                for i in self.__dict__:  # line used to say: 'for i in self.parameters:'
 
                     # do not print these flags, as they are subject to change
                     if i not in ["state", "interrupted"]:
-                        f.write(f"{i}: {self.__dict__[i]}\n")   # line used to say: 'f.write(f"{i}: {self.parameters[i]}\n")'
+                        f.write(f"{i}: {self.__dict__[i]}\n")
+                        # previous line used to say: 'f.write(f"{i}: {self.parameters[i]}\n")'
 
                 # add an extra new line to indicate the main protocol beginning.
                 f.write("\n")
@@ -426,12 +401,13 @@ class Session:
                 f.write(f"({create_entry_id()}) {current_jd(time):.10f} -> SEEV SESSION "
                         f"{self.obsID} STARTED\n")
         except PermissionError:
-            raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
+            raise PermissionError("Error when writing to .aopl: You do not have the adequate access rights!")
 
         # create or overwrite the parameter and flags log. This is a JSON file.
         try:
             with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "w") as f:
-                f.write(json.dumps(self.__dict__, indent=4))    # line used to say: 'f.write(json.dumps(self.parameters, indent=4))'
+                f.write(json.dumps(self.__dict__, indent=4))
+                # previous line used to say: 'f.write(json.dumps(self.parameters, indent=4))'
         except PermissionError:
             raise PermissionError("Error when writing to .aol: You do not have the adequate access rights!")
         # v1.x END
@@ -443,13 +419,14 @@ class Session:
         # this is the root element of the xml file
         session_root = ET.Element("session")
 
-        # this will be where all the session parameters and metadata lives
+        # this will be where all the session parameters and metadata live
         parameters_subelement = ET.SubElement(session_root, "parameters")
 
         # populate the parameters sub-element with all the available metadata
-        for i in self.__dict__: # line used to say: 'for i in self.parameters:'
+        for i in self.__dict__:  # line used to say: 'for i in self.parameters:'
             current_parameter = ET.SubElement(parameters_subelement, i)
-            current_parameter.text = str(self.__dict__[i])  # line used to say: 'current_parameter.text = str(self.parameters[i])'
+            current_parameter.text = str(self.__dict__[i])
+            # previous line used to say: 'current_parameter.text = str(self.parameters[i])'
 
         # log the session starting
         session_starts_subelement = ET.SubElement(session_root, "start")
@@ -471,15 +448,16 @@ class Session:
     @staticmethod
     def __write_to_aop(self, opcode: str, argument: str, time: str = "current") -> None:
         """
-        This pseudo-private method is called to update the .aop protocol file.
+        This pseudo-private method is called to update the .aopl legacy protocol file.
 
         For the syntax, check with the Astronomical Observation Protocol Syntax
         Guide.
+        **CAUTION!** This method should be considered deprecated and should not be used in any new code!
 
         :param opcode: The operation code of the event to be written to protocol, as
             described in the AOP Syntax Guide.
         :type opcode: ``str``
-        :param argument: Whatever is to be written to the argument position in the .aop
+        :param argument: Whatever is to be written to the argument position in the .aopl
             protocol entry.
         :type argument: ``str``
         :param time: An ISO 8601 conform string of the UTC datetime you want to use. Can also be "current", in which
@@ -488,23 +466,25 @@ class Session:
             argument on to __write_to_aop(), defaults to "current".
         :type time: ``str``, optional
 
-        :raises PermissionError: If the user does not have the adequate access rights for writing to the .aop file.
+        :raises PermissionError: If the user does not have the adequate access rights for writing to the .aopl file.
         """
 
+        # try to open the existing
         try:
             with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aopl", "at") as f:
                 f.write(f"({create_entry_id(time)}) {current_jd(time):.10f} -> {opcode} "
                         f"{argument}\n")
         except PermissionError:
-            raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
+            raise PermissionError("Error when writing to .aopl: You do not have the adequate access rights!")
 
     @staticmethod
     def __write_to_aol(self, parameter: str, assigned_value) -> None:
         """
-        This pseudo-private method is used to update the .aol parameter log.
+        This pseudo-private method is used to update the .aol legacy parameter log.
 
         It takes two arguments, the first being the parameter name being updated,
         the second one being the value it is assigned.
+        **CAUTION!** This method should be considered deprecated and should not be used in any new code!
 
         :param parameter: The name of the parameter being updated.
         :type parameter: ``str``
@@ -536,10 +516,7 @@ class Session:
         """
         This method interrupts the session.
 
-        It sets the Session's ``interrupted`` flag to True in the instance
-        attribute as well as the ``parameter`` attribute. After this, it writes a
-        Session Event "SEEV SESSION INTERRUPTED" to the protocol and updates
-        the .aol parameter log.
+        It sets the Session's ``interrupted`` flag to True and logs that change.
 
         :param time: An ISO 8601 conform string of the UTC datetime you want your
             observation to be interrupted at. Can also be "current", in which case
@@ -566,6 +543,10 @@ class Session:
         # v1.x START
         # write session event: session interrupted to protocol
         self.__write_to_aop(self, "SEEV", "SESSION INTERRUPTED", time=time)
+
+        # update session parameters: interrupted = True
+        assigned_value = True
+        self.__write_to_aol(self, "interrupted", assigned_value)
         # v1.x END
 
         # v2.x START
@@ -612,18 +593,11 @@ class Session:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
         # v2.x END
 
-        # update session parameters: interrupted = True
-        assigned_value = True
-        self.__write_to_aol(self, "interrupted", assigned_value)
-
     def resume(self, time: str = "current") -> None:
         """
         This method resumes the session.
 
-        It sets the Session's ``interrupted`` flag to False in the instance
-        attribute as well as the ``parameter`` attribute. After this, it writes a
-        Session Event "SEEV SESSION RESUMED" to the protocol and updates the
-        .aol parameter log.
+        It sets the Session's ``interrupted`` flag to False and logs that change.
 
         :param time: An ISO 8601 conform string of the UTC datetime you want your
             observation to be resumed at. Can also be "current", in which case the
@@ -704,10 +678,7 @@ class Session:
         """
         This method aborts the session while providing a reason for doing so.
 
-        It sets the Session's ``state`` flag to "aborted" in the instance
-        attribute as well as the ``parameter`` attribute. After this, it writes a
-        Session Event "SEEV %reason%: SESSION %obsID% ABORTED" to the protocol
-        and updates the .aol parameter log.
+        It sets the Session's ``state`` flag to "aborted" and logs that change.
 
         :param reason: The reason why this session had to be aborted.
         :type reason: ``str``
@@ -791,10 +762,7 @@ class Session:
         """
         This method is called to end the observing session.
 
-        It sets the Session's ``state`` flag to "ended" in the instance
-        attribute as well as the ``parameter`` attribute. After this, it writes a
-        Session Event "SEEV SESSION %obsID% ENDED" to the protocol and updates
-        the .aol parameter log.
+        It sets the Session's ``state`` flag to "ended" and logs that change.
 
         :param time: An ISO 8601 conform string of the UTC datetime you want your
             observation to be ended at. Can also be "current", in which case the
@@ -872,10 +840,6 @@ class Session:
         """
         This method adds an observer's comment to the protocol.
 
-        It writes an Observer's Comment "OBSC %comment%" to the protocol, where
-        the AOP argument is whatever string is passed as the 'comment' argument
-        to the method verbatim.
-
         :param comment: Whatever you want your comment to read in the protocol.
         :type comment: ``str``
         :param time: An ISO 8601 conform string of the UTC datetime you want your
@@ -929,11 +893,10 @@ class Session:
         """
         This method is called to report an issue to the protocol.
 
-        It evaluates the ``severity`` argument and after that writes the
-        corresponding ISSU (Issue) to the protocol:
-            * "potential"/"p": "ISSU Potential Issue: %message%"
-            * "normal"/"n": "ISSU Normal Issue: %message%"
-            * "major"/"m": "ISSU Major Issue: %message%"
+        There are three severity levels available:
+            * potential
+            * normal
+            * major
 
         :param severity: An indicator of the issue's severity. It has to be one of the
             following strings:
@@ -944,8 +907,7 @@ class Session:
                 * "major"
                 * "m".
         :type severity: ``str``
-        :param message: A short description of the issue that is printed to the protocol
-            verbatim.
+        :param message: A short description of the issue that is logged as well.
         :type message: ``str``
         :param time: An ISO 8601 conform string of the UTC datetime you want your
             issue to be reported at. Can also be "current", in which case the
@@ -954,7 +916,7 @@ class Session:
 
         :raises SessionNotStartedError: If the session has not yet been started.
         :raises SessionStateError: If the session is not currently "running".
-        :raises ValueError: If an improper value is passed in the 'severity' argument, that is
+        :raises ValueError: If an improper value is passed to the 'severity' argument, that is
             anything different from:
                 * "potential"
                 * "p"
@@ -985,9 +947,7 @@ class Session:
 
         # v2.x START
         # make sure we're reporting a valid issue severity
-        if severity not in ["potential", "p", "normal", "n", "major", "m"]:
-            raise ValueError("Invalid issue severity!")
-        else:
+        if severity in ["potential", "p", "normal", "n", "major", "m"]:
             # parse element tree from .aop
             tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
 
@@ -1017,16 +977,16 @@ class Session:
                     f.write(session_byte)
             except PermissionError:
                 raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
-        # v2.x END
+            # v2.x END
+        else:
+            raise ValueError("Invalid issue severity!")
 
     def point_to_name(self, targets: list, time: str = "current") -> None:
         """
-        This method indicates the pointing to a target identified by name.
+        This method indicates the pointing to one or more target(s) identified by name.
 
-        It starts by evaluating the 'targets' argument provided to the method
-        and constructing a comma-separated list of targets, which is then
-        written in the AOP argument position in the Pointing "POIN Pointing at
-        target(s): %list of targets%" that is being written to the protocol.
+        It can handle multiple targets at once, each will be logged in its own sub-tag of the
+        'point' tag.
 
         :param targets: A list object that contains whatever objects represent the targets,
             most likely strings, but it could be any other object.
@@ -1058,8 +1018,7 @@ class Session:
         tar_str = ""
         # ... which is then iterated through by the function ...
         for i in range(len(targets)):
-            # ... that finally constructs a comma-separated string
-            # from the list ...
+            # ... that finally constructs a comma-separated string from the list ...
             if not i == 0:
                 tar_str += ", "
             tar_str += targets[i]
@@ -1105,10 +1064,9 @@ class Session:
         """
         This method indicates the pointing to ICRS coordinates.
 
-        It takes a 'ra' argument for right ascension and a 'dec' argument for
-        declination. After that, a Pointing "Pointing at coordinates: R.A.:
-        %ra% Dec.: %dec%" is written to the protocol. Provide decimal degrees
-        for declination and decimal hours for right ascension.
+        Unlike the :func:`point_to_name` method, this method can only handle one set
+        of coordinates each time, ideally representing the middle of the field of view.
+        Provide decimal degrees for declination and decimal hours for right ascension.
 
         :param ra: Right ascension in the ICRS coordinate framework.
         :type ra: ``float``
@@ -1121,7 +1079,8 @@ class Session:
 
         :raises SessionNotStartedError: If the session has not yet been started.
         :raises SessionStateError: If the session is not currently "running".
-        :raises TypeError: If 'ra' or 'dec' is not of type 'float'.
+        :raises TypeError: If 'ra' is not of type 'float'.
+        :raises TypeError: If 'dec' is not of type 'float'.
         :raises ValueError: If 'ra' is not 0.0h <= 'ra' < 24.0h.
         :raises ValueError: If 'dec' is not -90.0° <= 'dec' <= 90.0°.
         """
@@ -1187,18 +1146,18 @@ class Session:
 
     def take_frame(self, n: int, ftype: str, iso: int, expt: float, ap: float, time: str = "current") -> None:
         """
-        This method reports the taking of one or more frame(s) of the same target and the camera settings used.
+        This method reports the taking of one or more frame(s) of the same target and the same camera settings used.
 
-        It evaluates the type of frame provided in the ``ftype`` parameter to
-        arrive at a string to be written to the protocol as frame type:
-            * "science frame"/"science"/"sf"/"s": "science"
-            * "dark frame"/"dark"/"df"/"d": "dark"
-            * "flat frame"/"flat"/"ff"/"f": "flat"
-            * "bias frame"/"bias"/"bf"/"b": "bias"
-            * "pointing frame"/"pointing"/"pf"/"p": "pointing"
-        Finally, the method writes a Frame "FRAM %n% %frame type% frame(s)
-        taken with settings: Exp.t.: %expt%s, Ap.: f/%ap%, ISO: %ISO%" to the
-        protocol.
+        It is centered on using a DSLR/DSLM as detector, since it uses the term ISO and expects
+        aperture to be provided as a fraction, like it is common for photographic lenses.
+        You can use a dedicated astronomy camera as well however. Interpret 'iso' as Gain and
+        calculate the aperture fraction of your optics for the 'ap' argument.
+        This method recognizes five distinct frame types:
+            * science/light frame (sometimes called 'sub', too)
+            * dark frame
+            * flat frame
+            * bias frame
+            * pointing frame
 
         :param n: Number of frames of the specified frame type and settings that were
             taken of the same target.
@@ -1225,7 +1184,7 @@ class Session:
                 * "pf"
                 * "p".
         :type ftype: ``str``
-        :param iso: ISO setting that was used for the frame(s).
+        :param iso: ISO or Gain setting that was used for the frame(s).
         :type iso: ``int``
         :param ap: The denominator of the aperture setting that was used for the
             frame(s). For example, if f/5.6 was used, provide ap=5.6 to the
@@ -1330,7 +1289,7 @@ class Session:
         number_tag.text = str(n)
 
         ftype_tag = ET.SubElement(frame_element, "type")
-        ftype_tag.text = ftype
+        ftype_tag.text = typestr
 
         expt_tag = ET.SubElement(frame_element, "exposure")
         expt_tag.text = str(expt)
@@ -1359,18 +1318,10 @@ class Session:
         This method reports a condition description or measurement.
 
         Every argument is optional, just pass the values for the arguments you
-        want to protocol. Each argument will be processed completely
-        separately, so a separate protocol entry will be produced for every
+        want to log. Each argument will be processed completely
+        separately, so a separate log entry will be produced for every
         argument you provide. For each type of condition report, a
-        corresponding flag will be set as an instance attribute as well as a
-        parameter. This flag update will also be written to the parameter log.
-        In case a description is provided, a Condition Description "CDES
-        %description%" is written to the protocol, if a temperature, pressure
-        or humidity is provided, however, a Condition Measurement is written to
-        protocol for each measurement provided, respectively:
-            - "CMES Temperature: %temp%°C" and/or
-            - "CMES Air Pressure: %pressure% hPa" and/or
-            - "CMES Air Humidity: %humidity%%"
+        corresponding flag will be set.
 
         :param description: A short description of every relevant element influencing the
             overall observing description, but do not provide any measurements,
@@ -1641,31 +1592,36 @@ class Session:
                 raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
             # v2.x END
 
-    def report_variable_star_observation(self, star_id: str, chart_id: str, magnitude: float, comparison_star_1: str, comparison_star_2: str = None,
-                                         codes: list = None, time: str = "current") -> None:
+    def report_variable_star_observation(self, star_id: str, chart_id: str, magnitude: float, comparison_star_1: str,
+                                         comparison_star_2: str = None, codes: list = None,
+                                         time: str = "current") -> None:
         """
         This method reports a (visual) observation of a variable star.
 
-        It writes the op code "VSOB" and logs several important parameters.
-        This method is constructed with reporting your observation to the
+        Alongside your magnitude estimate, the finder chart you used as well as at least one
+        comparison star and possible comment codes are logged.
+        This method is very much constructed with reporting your observation to the
         American Association of Variable Star Observers (AAVSO) in mind.
         Please note, however, that it DOES NOT write an AAVSO Visual File
-        Format compliant report.
+        Format compliant report, as this is a higher task left to the front-end application.
 
         :param star_id: An unambiguous identifier of the variable star being observed (e.g. "del Cep").
         :type star_id: ``str``
-        :param chart_id: The ID of the finder chart in usage. AAVSO charts usually have a box at the upper righthand corner containing this information.
+        :param chart_id: The ID of the finder chart in usage. AAVSO charts usually have a box at the upper right-hand
+        corner containing this information.
         :type chart_id: ``str``
         :param magnitude: Your magnitude estimate, including the decimal point.
         :type magnitude: ``float``
-        :param comparison_star_1: The label of the first comparison star being used. AAVSO charts leave out the decimal point here, please do so as well.
+        :param comparison_star_1: The label of the first comparison star being used. AAVSO charts leave out the decimal
+        point here, please do so as well.
         :type comparison_star_1: ``str``
         :param comparison_star_2: The label of the second comparison star being used, if any.
         :type comparison_star_2: ``str``, optional
-        :param codes: A list of comment codes detailing your observation. Usage of the official AAVSO one-character comment codes is recommended, but not mandated.
+        :param codes: A list of comment codes detailing your observation. Usage of the official AAVSO one-character
+        comment codes is recommended, but not mandated.
         :type codes: ``list``, optional
         :param time: An ISO 8601 conform string of the UTC datetime you want your
-            condition update to be reported at. Can also be "current", in which
+            observation to be reported at. Can also be "current", in which
             case the current UTC datetime will be used, defaults to "current".
         :type time: ``str``, optional
         :return: None
@@ -1685,9 +1641,15 @@ class Session:
 
         # v1.x START
         if comparison_star_2 is not None:
-            self.__write_to_aop(self, "VSOB", f"{star_id}@{magnitude}: compared to {comparison_star_1} and {comparison_star_2} on chart '{chart_id}'. Comment codes: {codes}", time)
+            self.__write_to_aop(self, "VSOB",
+                                f"{star_id}@{magnitude}: compared to {comparison_star_1} and "
+                                f"{comparison_star_2} on chart '{chart_id}'. Comment codes: {codes}",
+                                time)
         else:
-            self.__write_to_aop(self, "VSOB", f"{star_id}@{magnitude}: compared to {comparison_star_1} on chart '{chart_id}'. Comment codes: {codes}", time)
+            self.__write_to_aop(self, "VSOB",
+                                f"{star_id}@{magnitude}: compared to {comparison_star_1} on chart '{chart_id}'."
+                                f" Comment codes: {codes}",
+                                time)
         # v1.x END
 
         # v2.x START
@@ -1740,79 +1702,98 @@ def parse_session(filepath: str, session_id: str) -> Session:
     """
     This function parses a session from memory to a new Session object.
 
-    Provided with the filepath to the general location where the protocol and
+    Provided with the filepath to the general location where the
     log files are stored and an observation ID, it reads in the observation
-    parameters from the session's parameter log. This information is then used
-    to create a new Session object, which is returned by the function. If it
-    has no observationID attribute, it is recreated from the function input.
+    parameters from the session's log. This information is then used
+    to create a new Session object, which is returned by the function.
 
     :param filepath: The path to the file where you expect the session directory to reside.
         This is most likely equivalent to the path passed to the Session class
-        to create its files in, which in turn is most likely somewhere in the
-        installation directory of the implementing script.
+        to create its files in.
     :type filepath: str
-    :param session_id: The observationID of the session to be parsed.
+    :param session_id: The observation ID of the session to be parsed.
     :type session_id: str
 
-    :raises AolNotFoundError: If there is no .aol file using the specified filepath and session_id.
-    :raises SessionIdDoesntExistOnFilepathError: If the specified session_id is not in the filepath provided.
+    :raises AolNotFoundError: If there is no .aol legacy file using the specified filepath and observation ID.
+    :raises SessionIdDoesntExistOnFilepathError: If the specified observation ID is not in the filepath provided.
     :raises NotADirectoryError: If the specified filepath does not constitute a directory.
 
     :return: The new Session object parsed from the stored observation parameters.
         For all intents and purposes, this object is equivalent to the object
         whose parameters were used to parse, and you can use it to continue your
-        observation session or protocol just the same. Just be careful not to
+        observation session or log just the same. Just be careful not to
         run the Session.start() method again, as this would overwrite the
-        existing protocol instead of continuing it!
+        existing protocol instead of continuing it! Due to the 'started' flag of
+        the new Session object most likely being set to True, however, this should
+        generally not be possible.
     :rtype: Session
     """
 
     # v1.x START
+    # Since this action cannot sensibly be carried out twice, the legacy part of this
+    # method is already disabled. Nevertheless, it is not removed for now, so that it can be
+    # re-activated if need should arise.
+
     # provided a filepath and the session_id, we can read the session parameters
-    """if path.isdir(filepath):
-        if path.isdir(f"{filepath}/{session_id}"):
-            try:
-                with open(f"{filepath}/{session_id}/{session_id}.aol", "rb") as log:
-                    param = json.load(log)
-            except FileNotFoundError:
-                raise AolNotFoundError(session_id)
-            finally:
-                log.close()
-            # unpacking the dictionary we obtained from the .aol, we can construct a
-            # new Session object
-            session = Session(filepath, **param)
-            # if there is no observationID attribute, we (re-)create it from the
-            # function input
-            if not hasattr(session, "obsID"):
-                session.obsID = param["obsID"]
-                session.parameters["obsID"] = session.obsID
-            return session
-        else:
-            raise SessionIDDoesntExistOnFilepathError(session_id)
-    else:
-        raise NotADirectoryError("your 'filepath' argument is not a directory")"""
+    # if path.isdir(filepath):
+    #     if path.isdir(f"{filepath}/{session_id}"):
+    #         try:
+    #             with open(f"{filepath}/{session_id}/{session_id}.aol", "rb") as log:
+    #                 param = json.load(log)
+    #         except FileNotFoundError:
+    #             raise AolNotFoundError(session_id)
+    #         finally:
+    #             log.close()
+    #         # unpacking the dictionary we obtained from the .aol, we can construct a
+    #         # new Session object
+    #         session = Session(filepath, **param)
+    #         # if there is no observationID attribute, we (re-)create it from the
+    #         # function input
+    #         if not hasattr(session, "obsID"):
+    #             session.obsID = param["obsID"]
+    #             session.parameters["obsID"] = session.obsID
+    #         return session
+    #     else:
+    #         raise SessionIDDoesntExistOnFilepathError(session_id)
+    # else:
+    #     raise NotADirectoryError("your 'filepath' argument is not a directory")
+
     # v1.x END
 
     # v2.x START
+    # this is a helper-function allowing to extract the contents of an xml ElementTree into a dictionary.
     def extract_parameters(xml):
-        parameters_dict = {}
+        parameters_dictionary = {}
+        # iterating through every element of the xml object...
         for element in xml:
+            # if it has no more sub-elements, we can copy it into the dictionary, the tag being used as the key
+            # and the text as the value
             if len(element) == 0:
-                parameters_dict[element.tag] = element.text
+                parameters_dictionary[element.tag] = element.text
+            # if it has sub-elements, however, we're going to process them the same way, using recursion
             else:
-                parameters_dict[element.tag] = extract_parameters(element)
-        return parameters_dict
+                parameters_dictionary[element.tag] = extract_parameters(element)
+        return parameters_dictionary
 
+    # is the provided filepath actually a directory?
     if path.isdir(filepath):
+        # is there a valid subdirectory for the observation/session ID provided?
         if path.isdir(f"{filepath}/{session_id}"):
             try:
+                # getting the root session element of the log...
                 tree = ET.parse(f"{filepath}/{session_id}/{session_id}.aop")
                 root = tree.getroot()
+                # ...finding the parameters subelement...
                 parameters_xml = root.find("parameters")
+                # ...extracting the information to a directory...
                 parameters_dict = extract_parameters(parameters_xml)
+                # ...adding the 'parsing' key to it so the Session constructor knows not
+                # to handle this as a brand-new session...
                 parameters_dict["parsing"] = True
+                # ...all before finally constructing and returning the new Session object...
                 session = Session(filepath, **parameters_dict)
                 return session
+            # ... except we somehow can't find the log file in the directory.
             except FileNotFoundError:
                 raise AolNotFoundError(session_id)
         else:
@@ -1820,9 +1801,3 @@ def parse_session(filepath: str, session_id: str) -> Session:
     else:
         raise NotADirectoryError("Your 'filepath' argument is not a directory.")
     # v2.x END
-
-
-if __name__ == '__main__':
-    x = Session("C:/Users/Amélie/Documents/Astronomical Observation Protocol Program/aop_test")
-    x.start()
-    print(x.__dict__)
