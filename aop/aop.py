@@ -365,10 +365,10 @@ class Session:
         # self.parameters["obsID"] = self.obsID
 
         # create the directory where the session's data will be stored
-        makedirs(self.filepath + "\\" + str(self.obsID), exist_ok=True)
+        makedirs(self.filepath + "/" + str(self.obsID), exist_ok=True)
 
         # check whether the protocol file already exists
-        if path.exists(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop"):
+        if path.exists(f"{self.filepath}/{self.obsID}/{self.obsID}.aop"):
             raise AopFileAlreadyExistsError(self.filepath, self.obsID)
 
         # v1.x START
@@ -378,13 +378,13 @@ class Session:
         # discontinuing the usage of self.parameters in favour of self.__dict__.
 
         # check whether the legacy protocol files already exist
-        if path.exists(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aopl"):
+        if path.exists(f"{self.filepath}/{self.obsID}/{self.obsID}.aopl"):
             raise AopFileAlreadyExistsError(self.filepath, self.obsID)
-        if path.exists(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol"):
+        if path.exists(f"{self.filepath}/{self.obsID}/{self.obsID}.aol"):
             raise AolFileAlreadyExistsError(self.filepath, self.obsID)
 
         try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aopl", "wt") as f:
+            with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aopl", "wt") as f:
                 # start each .aop file with the static observation parameters
                 for i in self.__dict__:  # line used to say: 'for i in self.parameters:'
 
@@ -405,7 +405,7 @@ class Session:
 
         # create or overwrite the parameter and flags log. This is a JSON file.
         try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "w") as f:
+            with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aol", "w") as f:
                 f.write(json.dumps(self.__dict__, indent=4))
                 # previous line used to say: 'f.write(json.dumps(self.parameters, indent=4))'
         except PermissionError:
@@ -439,7 +439,7 @@ class Session:
 
         try:
             # write byte object to file
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+            with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aop", "wb") as f:
                 f.write(byte_xml)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
@@ -471,7 +471,7 @@ class Session:
 
         # try to open the existing
         try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aopl", "at") as f:
+            with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aopl", "at") as f:
                 f.write(f"({create_entry_id(time)}) {current_jd(time):.10f} -> {opcode} "
                         f"{argument}\n")
         except PermissionError:
@@ -499,7 +499,7 @@ class Session:
         # write flag change to parameter log. Since this is JSON, the file
         # is first read to param ...
         try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "rb") as log:
+            with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aol", "rb") as log:
                 param = json.load(log)
         except PermissionError:
             raise PermissionError("Error when reading from .aol: You do not have the adequate access rights!")
@@ -507,7 +507,7 @@ class Session:
         param[parameter] = assigned_value
         # ... before the file is overwritten with the updated param object.
         try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aol", "w") as log:
+            with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aol", "w") as log:
                 log.write(json.dumps(param, indent=4))
         except PermissionError:
             raise PermissionError("Error when writing to .aol: You do not have the adequate access rights!")
@@ -551,7 +551,7 @@ class Session:
 
         # v2.x START
         # parse element tree from .aop
-        tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+        tree = ET.parse(f"{self.filepath}/{self.obsID}/{self.obsID}.aop")
 
         # get root tag (session)
         session_root = tree.getroot()
@@ -587,7 +587,7 @@ class Session:
 
         # ...then trying to write the file to memory, if we have permission to do so
         try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+            with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aop", "wb") as f:
                 f.write(session_byte)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
@@ -632,7 +632,7 @@ class Session:
 
         # v2.x START
         # parse element tree from .aop
-        tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+        tree = ET.parse(f"{self.filepath}/{self.obsID}/{self.obsID}.aop")
 
         # get root tag (session)
         session_root = tree.getroot()
@@ -668,7 +668,7 @@ class Session:
 
         # ...then trying to write the file to memory, if we have permission to do so
         try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+            with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aop", "wb") as f:
                 f.write(session_byte)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
@@ -713,7 +713,7 @@ class Session:
 
         # v2.x START
         # parse element tree from .aop
-        tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+        tree = ET.parse(f"{self.filepath}/{self.obsID}/{self.obsID}.aop")
 
         # get root tag (session)
         session_root = tree.getroot()
@@ -752,7 +752,7 @@ class Session:
 
         # ...then trying to write the file to memory, if we have permission to do so
         try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+            with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aop", "wb") as f:
                 f.write(session_byte)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
@@ -794,7 +794,7 @@ class Session:
 
         # v2.x START
         # parse element tree from .aop
-        tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+        tree = ET.parse(f"{self.filepath}/{self.obsID}/{self.obsID}.aop")
 
         # get root tag (session)
         session_root = tree.getroot()
@@ -830,7 +830,7 @@ class Session:
 
         # ...then trying to write the file to memory, if we have permission to do so
         try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+            with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aop", "wb") as f:
                 f.write(session_byte)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
@@ -863,7 +863,7 @@ class Session:
 
         # v2.x START
         # parse element tree from .aop
-        tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+        tree = ET.parse(f"{self.filepath}/{self.obsID}/{self.obsID}.aop")
 
         # get root tag (session)
         session_root = tree.getroot()
@@ -883,7 +883,7 @@ class Session:
 
         # ...then trying to write the file to memory, if we have permission to do so
         try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+            with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aop", "wb") as f:
                 f.write(session_byte)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
@@ -949,7 +949,7 @@ class Session:
         # make sure we're reporting a valid issue severity
         if severity in ["potential", "p", "normal", "n", "major", "m"]:
             # parse element tree from .aop
-            tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+            tree = ET.parse(f"{self.filepath}/{self.obsID}/{self.obsID}.aop")
 
             # get root tag (session)
             session_root = tree.getroot()
@@ -973,7 +973,7 @@ class Session:
 
             # ...then trying to write the file to memory, if we have permission to do so
             try:
-                with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aop", "wb") as f:
                     f.write(session_byte)
             except PermissionError:
                 raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
@@ -1032,7 +1032,7 @@ class Session:
             raise TypeError("Please provide the 'targets' argument as a list, even if it only has one item.")
 
         # parse element tree from .aop
-        tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+        tree = ET.parse(f"{self.filepath}/{self.obsID}/{self.obsID}.aop")
 
         # get root tag (session)
         session_root = tree.getroot()
@@ -1054,7 +1054,7 @@ class Session:
 
         # ...then trying to write the file to memory, if we have permission to do so
         try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+            with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aop", "wb") as f:
                 f.write(session_byte)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
@@ -1114,7 +1114,7 @@ class Session:
 
         # v2.x START
         # parse element tree from .aop
-        tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+        tree = ET.parse(f"{self.filepath}/{self.obsID}/{self.obsID}.aop")
 
         # get root tag (session)
         session_root = tree.getroot()
@@ -1138,7 +1138,7 @@ class Session:
 
         # ...then trying to write the file to memory, if we have permission to do so
         try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+            with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aop", "wb") as f:
                 f.write(session_byte)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
@@ -1272,7 +1272,7 @@ class Session:
 
         # v2.x START
         # parse element tree from .aop
-        tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+        tree = ET.parse(f"{self.filepath}/{self.obsID}/{self.obsID}.aop")
 
         # get root tag (session)
         session_root = tree.getroot()
@@ -1305,7 +1305,7 @@ class Session:
 
         # ...then trying to write the file to memory, if we have permission to do so
         try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+            with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aop", "wb") as f:
                 f.write(session_byte)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
@@ -1367,7 +1367,7 @@ class Session:
 
             # v2.x START
             # parse element tree from .aop
-            tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+            tree = ET.parse(f"{self.filepath}/{self.obsID}/{self.obsID}.aop")
 
             # get root tag (session)
             session_root = tree.getroot()
@@ -1406,7 +1406,7 @@ class Session:
 
             # ...then trying to write the file to memory, if we have permission to do so
             try:
-                with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aop", "wb") as f:
                     f.write(session_byte)
             except PermissionError:
                 raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
@@ -1427,7 +1427,7 @@ class Session:
 
             # v2.x START
             # parse element tree from .aop
-            tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+            tree = ET.parse(f"{self.filepath}/{self.obsID}/{self.obsID}.aop")
 
             # get root tag (session)
             session_root = tree.getroot()
@@ -1466,7 +1466,7 @@ class Session:
 
             # ...then trying to write the file to memory, if we have permission to do so
             try:
-                with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aop", "wb") as f:
                     f.write(session_byte)
             except PermissionError:
                 raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
@@ -1487,7 +1487,7 @@ class Session:
 
             # v2.x START
             # parse element tree from .aop
-            tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+            tree = ET.parse(f"{self.filepath}/{self.obsID}/{self.obsID}.aop")
 
             # get root tag (session)
             session_root = tree.getroot()
@@ -1526,7 +1526,7 @@ class Session:
 
             # ...then trying to write the file to memory, if we have permission to do so
             try:
-                with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aop", "wb") as f:
                     f.write(session_byte)
             except PermissionError:
                 raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
@@ -1547,7 +1547,7 @@ class Session:
 
             # v2.x START
             # parse element tree from .aop
-            tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+            tree = ET.parse(f"{self.filepath}/{self.obsID}/{self.obsID}.aop")
 
             # get root tag (session)
             session_root = tree.getroot()
@@ -1586,7 +1586,7 @@ class Session:
 
             # ...then trying to write the file to memory, if we have permission to do so
             try:
-                with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+                with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aop", "wb") as f:
                     f.write(session_byte)
             except PermissionError:
                 raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
@@ -1654,7 +1654,7 @@ class Session:
 
         # v2.x START
         # parse element tree from .aop
-        tree = ET.parse(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop")
+        tree = ET.parse(f"{self.filepath}/{self.obsID}/{self.obsID}.aop")
 
         # get root tag (session)
         session_root = tree.getroot()
@@ -1691,7 +1691,7 @@ class Session:
 
         # ...then trying to write the file to memory, if we have permission to do so
         try:
-            with open(f"{self.filepath}\\{self.obsID}\\{self.obsID}.aop", "wb") as f:
+            with open(f"{self.filepath}/{self.obsID}/{self.obsID}.aop", "wb") as f:
                 f.write(session_byte)
         except PermissionError:
             raise PermissionError("Error when writing to .aop: You do not have the adequate access rights!")
